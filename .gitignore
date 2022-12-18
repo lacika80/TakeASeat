@@ -1,0 +1,6 @@
+node_modules
+/client/README.md
+/server/Procfile
+package-lock.json
+.Procfile
+.env
