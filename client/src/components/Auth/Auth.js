@@ -8,7 +8,7 @@ import { logout, registration, signin, getStatus, signup } from "../../features/
 
 //import { signin, signup } from "../../actions/auth";
 
-const initialState = { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" };
+const initialState = { first_name: "", last_name: "", email: "", password: "", confirmPassword: "" };
 
 const Auth = () => {
     const user = useSelector((state) => state.user);
@@ -21,7 +21,6 @@ const Auth = () => {
     const handleShowPassword = () => setShowPassword(!showPassword);
 
     const switchMode = () => {
-        setForm(initialState);
         setIsSignup((prevIsSignup) => !prevIsSignup);
         setShowPassword(false);
     };
@@ -68,8 +67,8 @@ const Auth = () => {
                     <Grid container spacing={2}>
                         {isSignup && (
                             <>
-                                <Input name="firstName" label="First Name" handleChange={handleChange} autoFocus half />
-                                <Input name="lastName" label="Last Name" handleChange={handleChange} half />
+                                <Input name="first_name" label="First Name" handleChange={handleChange} autoFocus half />
+                                <Input name="last_name" label="Last Name" handleChange={handleChange} half />
                             </>
                         )}
                         <Input name="email" label="Email Address" handleChange={handleChange} type="email" />

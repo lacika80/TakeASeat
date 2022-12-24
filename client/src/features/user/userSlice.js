@@ -11,12 +11,14 @@ const initialState = {
 
 const USER_URL = "http://localhost:5000/user/signin";
 
-export const signin = createAsyncThunk("", async (formData) => {
-    const response = await axios.post(USER_URL, formData);
+export const signin = createAsyncThunk("user/signin", async (formData) => {
+    const response = await api.signIn(formData);
     return response.data;
 });
-export const signup = createAsyncThunk("a",async (formData) => {
-    const response = await axios.post("http://localhost:5000/user/signup", formData);
+
+export const signup = createAsyncThunk("user/signup", async (formData) => {
+    console.log(formData);
+    const response = await api.signUp(formData);
     return response.data;
 });
 
@@ -60,7 +62,7 @@ export const userSlice = createSlice({
                 state.name = action.payload.result.name;
                 state.email = action.payload.result.email;
                 state.token = action.payload.token;
-            })
+            });
     },
 });
 
