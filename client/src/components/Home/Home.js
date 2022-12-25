@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, Outlet, redirect, useHistory, useLocation, useNavigate } from "react-router-dom";
 import decode from "jwt-decode";
-import { logout, loginWithToken } from "../../features/user/userSlice";
+import { logout, loginWithToken } from "../../features/userSlice";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -17,10 +17,10 @@ const Home = () => {
             const decodedToken = decode(ls.token);
             if (decodedToken.exp * 1000 < new Date().getTime()) {
                 dispatch(logout());
-            }else if (user.id == null) {
-                dispatch(loginWithToken())
+            } else if (user.id == null) {
+                dispatch(loginWithToken());
             }
-        }else if (user.id != null) {
+        } else if (user.id != null) {
             dispatch(logout());
         }
     }, [dispatch, location]);

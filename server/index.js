@@ -7,7 +7,6 @@ import userRouter from "./routes/user.js";
 import restaurantRouter from "./routes/restaurant.js";
 import dynamicLinkRouter from './routes/dynamicLink.js'
 import dotenv from "dotenv";
-import { mailer } from "./libs/mailer.js";
 
 const app = express();
 dotenv.config();
@@ -18,7 +17,6 @@ app.use(cors());
 app.use("/user", userRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/verify", dynamicLinkRouter);
-//mailer();
 const PORT = process.env.PORT || 5000;
 mongoose.set("strictQuery", false);
 mongoose

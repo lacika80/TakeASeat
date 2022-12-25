@@ -5,35 +5,48 @@ import dotenv from "dotenv";
 
 import UserModel from "../models/user.js";
 import DynamicLinkModel from "../models/dynamicLink.js";
-import { exit } from "process";
 dotenv.config();
 
 export const useLink = async (req, res) => {
-    const link = await getDyniamicLink(req.query.token);
-    if (!(await tokenIsValid(link))) 
-        return res.status(400).json({ message: "Token nem érvényes" });
+    const link = await getDyniamicLink(req.body.token);
+    const { password, confirmPassword } = req.body;
+    if (!(await tokenIsValid(link))) return res.status(405).json({ error: "Token nem érvényes" });
     switch (link.type) {
         case 1:
             try {
                 await verifyLink(link);
                 return res.status(200).json({ message: "Sikeres érvényesítés" });
             } catch (error) {
-                return res.status(500).json({ message: "Something went wrong" });
                 console.log(error);
+                return res.status(500).json({ error: "Valami félrement" });
+            }
+            break;
+        case 2:
+            if (!password || !confirmPassword || password != confirmPassword) return res.status(400).json({ error: "Jelszó nem megfelelő" });
+            try {
+                await resetPasswordLink(link, password);
+                return res.status(200).json({ message: "Sikeres Jelszó változtatás" });
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({ error: "Valami félrement" });
             }
 
             break;
 
         default:
-            return res.status(400).json({ message: "Hibás token" });
+            return res.status(405).json({ error: "Hibás token" });
             break;
     }
 };
-const getDyniamicLink = async (token) => {
+const resetPasswordLink = async (link, password) => {
+    await UserModel.findByIdAndUpdate(link.receiver_id, { password: await bcrypt.hash(password, 12) }, { new: true });
+    await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: date }, { new: true });
+};
+export const getDyniamicLink = async (token) => {
     const link = await DynamicLinkModel.findOne({ link: token });
     return link;
 };
-const tokenIsValid = async (link) => {
+export const tokenIsValid = async (link) => {
     if (!link) return false;
     const date = new Date();
     if (date > link.date_valid_until || link.date_of_used) return false;
@@ -43,4 +56,9 @@ const verifyLink = async (link) => {
     const date = new Date();
     await UserModel.findByIdAndUpdate(link.receiver_id, { is_verified: true, global_permission: 1 }, { new: true });
     await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: date }, { new: true });
+};
+
+export const getEmailFromLink = async (req, res) => {
+    const link = await getDyniamicLink(req.body.token);
+    return res.status(200).json({ email: link.email, is_valid: await tokenIsValid(link) });
 };

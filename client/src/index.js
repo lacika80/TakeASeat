@@ -9,20 +9,24 @@ import reportWebVitals from "./reportWebVitals";
 
 import { reducers } from "./reducers";
 import App from "./App";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { createBrowserRouter, createRoutesFromElements, Link, Navigate, Outlet, Route, RouterProvider, useLocation } from "react-router-dom";
 
-
-
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
-
-
-
+const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  });
+{
+    /* <React.StrictMode>
+    </React.StrictMode> */
+}
 root.render(
-    <React.StrictMode>
-        <Provider store={store}>
+    <Provider store={store}>
+        <ThemeProvider theme={darkTheme}>
             <App />
-        </Provider>
-    </React.StrictMode>
+        </ThemeProvider>
+    </Provider>
 );
 //reportWebVitals(console.log);

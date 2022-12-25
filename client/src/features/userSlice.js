@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import * as api from "../../api/index";
+import * as api from "../api/index";
 import axios from "axios";
 
 const initialState = {
@@ -17,8 +17,12 @@ export const signin = createAsyncThunk("user/signin", async (formData) => {
 });
 
 export const signup = createAsyncThunk("user/signup", async (formData) => {
-    console.log(formData);
     const response = await api.signUp(formData);
+    return response.data;
+});
+
+export const forgottenPW = createAsyncThunk("user/forgottenpw", async (formData) => {
+    const response = await api.forgottenPW(formData);
     return response.data;
 });
 
