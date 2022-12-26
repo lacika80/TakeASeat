@@ -4,11 +4,9 @@ import React, { useEffect, useState } from "react";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Input from "./Input";
 import { Form, Navigate, redirect, useNavigate } from "react-router-dom";
-import { logout, registration, signin, getStatus, signup } from "../../features/user/userSlice";
+import { logout, registration, signin, getStatus, signup, forgottenPW } from "../../features/userSlice";
 
-//import { signin, signup } from "../../actions/auth";
-
-const initialState = { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" };
+const initialState = { first_name: "", last_name: "", email: "", password: "", confirmPassword: "" };
 
 const Auth = () => {
     const user = useSelector((state) => state.user);
@@ -16,13 +14,12 @@ const Auth = () => {
     const navigate = useNavigate();
 
     const [form, setForm] = useState(initialState);
-    const [isSignup, setIsSignup] = useState(false);
+    const [mode, setMode] = useState("login");
     const [showPassword, setShowPassword] = useState(false);
     const handleShowPassword = () => setShowPassword(!showPassword);
 
-    const switchMode = () => {
-        setForm(initialState);
-        setIsSignup((prevIsSignup) => !prevIsSignup);
+    const switchMode = (type) => {
+        setMode(type);
         setShowPassword(false);
     };
 
@@ -36,10 +33,18 @@ const Auth = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (isSignup) {
-            dispatch(signup(form));
-        } else {
-            dispatch(signin(form));
+        switch (mode) {
+            case "login":
+                dispatch(signin({email:form.email, password:form.password}));
+                break;
+            case "reg":
+                dispatch(signup(form));
+                break;
+            case "forgottenPW":
+                dispatch(forgottenPW({email:form.email}));
+                break;
+            default:
+                break;
         }
     };
 
@@ -58,31 +63,65 @@ const Auth = () => {
     );*/
 
     return (
-        <Box component="main" maxWidth="xs" sx={{ border: 2, borderColor: "primary.main", display: "flex", justifyContent: "center", alignItems: "center", m: 1, p: 1 }}>
-            <Paper elevation={3}>
+        <Box component="main" maxWidth="xs" sx={{ display: "flex", justifyContent: "center", alignItems: "center", m: 1, p: 1 }}>
+            <Paper elevation={3} sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", p: 2 }}>
                 <Avatar>
                     <LockOutlinedIcon />
                 </Avatar>
-                <Typography variant="h5">{isSignup ? "sign up" : "sign in"}</Typography>
+                <Typography variant="h5" sx={{ p: 1 }}>
+                    {mode == "reg" && "regisztráció"}
+                    {mode == "login" && "Bejelentkezés"}
+                    {mode == "forgottenPW" && "Elfelejtett jelszó"}
+                </Typography>
                 <Form onSubmit={handleSubmit}>
-                    <Grid container spacing={2}>
-                        {isSignup && (
+                    <Grid container spacing={2} minWidth={"40rem"} maxWidth={"60rem"}>
+                        {mode == "reg" && (
                             <>
-                                <Input name="firstName" label="First Name" handleChange={handleChange} autoFocus half />
-                                <Input name="lastName" label="Last Name" handleChange={handleChange} half />
+                                <Input name="first_name" label="First Name" handleChange={handleChange} autoFocus half />
+                                <Input name="last_name" label="Last Name" handleChange={handleChange} half />
                             </>
                         )}
-                        <Input name="email" label="Email Address" handleChange={handleChange} type="email" />
-                        <Input name="password" label="Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword} />
-                        {isSignup && <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type="password" />}
+                        <Input name="email" label="Email Address" handleChange={handleChange} type="email" value={form.email} />
+                        {mode != "forgottenPW" && (
+                            <Input
+                                name="password"
+                                label="Password"
+                                handleChange={handleChange}
+                                type={showPassword ? "text" : "password"}
+                                handleShowPassword={handleShowPassword}
+                                autocomplete={mode == "login" ? "current-password" : "new-password"}
+                            />
+                        )}
+                        {mode == "reg" && <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type="password" autocomplete="new-password" />}
                     </Grid>
-                    <Button type="submit" fullWidth variant="contained" color="primary">
-                        {isSignup ? "Sign Up" : "Sign In"}
+                    <Button type="submit" fullWidth variant="contained" color="primary" sx={{ my: 2 }}>
+                        {mode == "reg" && "regisztráció"}
+                        {mode == "login" && "Bejelentkezés"}
+                        {mode == "forgottenPW" && "Új jelszó kérése"}
                     </Button>
 
                     <Grid container justify="flex-end">
                         <Grid item>
-                            <Button onClick={switchMode}>{isSignup ? "Already have an account? Sign in" : "Don't have an account? Sign Up"}</Button>
+                            {mode == "reg" && (
+                                <Button variant="outlined" onClick={() => switchMode("login")}>
+                                    Bejelentkezés
+                                </Button>
+                            )}
+                            {mode == "login" && (
+                                <Button variant="outlined" onClick={() => switchMode("reg")} sx={{ mr: 2 }}>
+                                    Regisztráció
+                                </Button>
+                            )}
+                            {mode == "login" && (
+                                <Button variant="outlined" onClick={() => switchMode("forgottenPW")}>
+                                    Elfelejtett jelszó
+                                </Button>
+                            )}
+                            {mode == "forgottenPW" && (
+                                <Button variant="outlined" onClick={() => switchMode("login")}>
+                                    Bejelentkezés
+                                </Button>
+                            )}
                         </Grid>
                     </Grid>
                 </Form>

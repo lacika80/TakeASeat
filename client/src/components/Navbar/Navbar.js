@@ -2,7 +2,7 @@ import { Box, Button, Toolbar } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../features/user/userSlice";
+import { logout } from "../../features/userSlice";
 
 export default function Navbar() {
     const dispatch = useDispatch();
