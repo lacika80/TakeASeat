@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, Outlet, redirect, useHistory, useLocation, useNavigate } from "react-router-dom";
 import decode from "jwt-decode";
@@ -10,6 +10,7 @@ const Home = () => {
 
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
+
 
     useEffect(() => {
         const ls = JSON.parse(localStorage.getItem("profile"));
@@ -26,8 +27,9 @@ const Home = () => {
     }, [dispatch, location]);
 
     useEffect(() => {
-        if (location.pathname == "/" && user.id == null) navigate("/auth");
-        else if (location.pathname == "/" && user.id != null) navigate("/choose");
+        console.log(location.pathname);
+        //if (location.pathname === "/" && user.id == null) navigate("/auth");
+        //else if (location.pathname === "/" && user.id != null) navigate("/choose");
     }, [location]);
 
     return <Outlet />;
