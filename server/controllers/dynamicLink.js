@@ -9,6 +9,7 @@ dotenv.config();
 
 export const useLink = async (req, res) => {
     const link = await getDyniamicLink(req.body.token);
+   
     const { password, confirmPassword } = req.body;
     if (!(await tokenIsValid(link))) return res.status(405).json({ error: "Token nem érvényes" });
     switch (link.type) {
@@ -40,7 +41,7 @@ export const useLink = async (req, res) => {
 };
 const resetPasswordLink = async (link, password) => {
     await UserModel.findByIdAndUpdate(link.receiver_id, { password: await bcrypt.hash(password, 12) }, { new: true });
-    await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: date }, { new: true });
+    await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: new Date() }, { new: true });
 };
 export const getDyniamicLink = async (token) => {
     const link = await DynamicLinkModel.findOne({ link: token });
@@ -59,6 +60,7 @@ const verifyLink = async (link) => {
 };
 
 export const getEmailFromLink = async (req, res) => {
-    const link = await getDyniamicLink(req.body.token);
+    if (!req.query.token) return res.status(405).json({ error: "Hibás token" });
+    const link = await getDyniamicLink(req.query.token);
     return res.status(200).json({ email: link.email, is_valid: await tokenIsValid(link) });
 };

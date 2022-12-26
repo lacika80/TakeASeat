@@ -7,13 +7,17 @@ const initialState = {
     receiver_email: null,
     status: null,
     message: null,
-    error: null
+    error: null,
 };
 
 export const verify = createAsyncThunk("verify", async (data) => {
+    const response = await api.verify(data);
+    return {data:response.data, status: response.status, error: response?.error};
+});
+export const getEmailFromToken = createAsyncThunk("getEmailFromToken", async (data) => {
     const body = { token: data };
-    const response = await api.verify(body);
-    return response;
+    const response = await api.getEmailFromToken(body);
+    return {data:response.data, status: response.status, error: response?.error};
 });
 
 export const linkSlice = createSlice({
@@ -26,17 +30,35 @@ export const linkSlice = createSlice({
                 state.status = "loading";
             })
             .addCase(verify.fulfilled, (state, action) => {
-                if (action.payload.error){
+                if (action.payload.error) {
                     state.status = "failed";
                     state.error = action.payload.error;
-                }
-                else{
-                state.status = "succeeded";
-                console.log(action);
-                state.message = action.payload.data.message;
+                } else {
+                    state.status = "succeeded";
+                    state.message = action.payload.data.message;
                 }
             })
             .addCase(verify.rejected, (state, action) => {
+                state.status = "failed";
+                state.error = "Szerver oldali hiba";
+            })
+
+
+            .addCase(getEmailFromToken.pending, (state, action) => {
+                state.status = "loading";
+            })
+            .addCase(getEmailFromToken.fulfilled, (state, action) => {
+                if (action.payload.error) {
+                    state.status = "failed";
+                    state.error = action.payload.error;
+                } else {
+                    state.status = "succeeded";
+                    state.receiver_email = action.payload.data.email;
+                    state.validity = action.payload.data.is_valid;
+
+                }
+            })
+            .addCase(getEmailFromToken.rejected, (state, action) => {
                 state.status = "failed";
                 state.error = "Szerver oldali hiba";
             });

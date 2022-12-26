@@ -10,7 +10,7 @@ const Verify = () => {
     const link = useSelector((state) => state.link);
 
     useEffect(() => {
-        dispatch(verify(searchParams.get("token")));
+        dispatch(verify({token:searchParams.get("token")}));
     }, []);
 
     return (

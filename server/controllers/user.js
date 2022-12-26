@@ -81,7 +81,6 @@ const createEmail = async (user, type) => {
 
     switch (type) {
         case process.env.DYNAMIC_LINK_VERIFY_EMAIL:
-            console.log(moment().add(1, 'd'));
             result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, 'd'), link });
 
             mailOptions = {
