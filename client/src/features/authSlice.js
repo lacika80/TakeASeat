@@ -1,12 +1,24 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as api from "../api/index";
 import axios from "axios";
+import jwtDecode from "jwt-decode";
 
-const initialState = {
-    id: null,
-    name: null,
-    email: null,
-    token: null,
+const initialState = () => {
+    const ls = JSON.parse(localStorage.getItem("profile"));
+    if (ls) {
+        const decodedToken = jwtDecode(ls.token);
+        if (decodedToken.exp * 1000 > new Date().getTime()) {
+            return {
+                user: {
+                    id: ls.result._id,
+                    name: ls.result.name,
+                    email: ls.result.email,
+                },
+                token: ls.token,
+            };
+        }
+    }
+    return { user: null, token: null };
 };
 
 const USER_URL = "http://localhost:5000/user/signin";
@@ -26,15 +38,15 @@ export const forgottenPW = createAsyncThunk("user/forgottenpw", async (formData)
     return response.data;
 });
 
-export const userSlice = createSlice({
-    name: "user",
+export const authSlice = createSlice({
+    name: "auth",
     initialState,
     reducers: {
         loginWithToken(state) {
             const ls = JSON.parse(localStorage.getItem("profile"));
-            state.id = ls.result._id;
-            state.name = ls.result.name;
-            state.email = ls.result.email;
+            state.user.id = ls.result._id;
+            state.user.name = ls.result.name;
+            state.user.email = ls.result.email;
             state.token = ls.token;
         },
         logout: () => {
@@ -50,26 +62,27 @@ export const userSlice = createSlice({
             .addCase(signin.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 localStorage.setItem("profile", JSON.stringify({ ...action?.payload }));
-                state.id = action.payload.result._id;
-                state.name = action.payload.result.name;
-                state.email = action.payload.result.email;
+                state.user.id = action.payload.result._id;
+                state.user.name = action.payload.result.name;
+                state.user.email = action.payload.result.email;
                 state.token = action.payload.token;
             })
             .addCase(signin.rejected, (state, action) => {
                 state.status = "failed";
-                state.user.error = action.error.message;
+                state.error = action.error.message;
             })
             .addCase(signup.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 localStorage.setItem("profile", JSON.stringify({ ...action?.payload }));
-                state.id = action.payload.result._id;
-                state.name = action.payload.result.name;
-                state.email = action.payload.result.email;
+                state.user.id = action.payload.result._id;
+                state.user.name = action.payload.result.name;
+                state.user.email = action.payload.result.email;
                 state.token = action.payload.token;
             });
     },
 });
 
-export const getStatus = (state) => state.user.status;
-export const { logout, loginWithToken } = userSlice.actions;
-export default userSlice.reducer;
+export const selectCurrentUser = (state) => state.auth.user;
+export const getStatus = (state) => state.status;
+export const { logout, loginWithToken } = authSlice.actions;
+export default authSlice.reducer;

@@ -2,7 +2,7 @@ import { Box, Button, Toolbar } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../features/userSlice";
+import { logout } from "../../features/authSlice";
 
 export default function Navbar() {
     const dispatch = useDispatch();
@@ -13,11 +13,6 @@ export default function Navbar() {
         const token = user?.token;
     }, [location]);
 
-    useEffect(() => {
-        if (user.id == null) {
-            navigate("/auth");
-        }
-    }, [user, dispatch]);
 
     return (
         <Box>

@@ -3,16 +3,19 @@ import { useDispatch, useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Input from "./Input";
-import { Form, Navigate, redirect, useNavigate } from "react-router-dom";
-import { logout, registration, signin, getStatus, signup, forgottenPW } from "../../features/userSlice";
+import { Navigate, redirect, useLocation, useNavigate } from "react-router-dom";
+import { logout, registration, signin, getStatus, signup, forgottenPW } from "../../features/authSlice";
+import { useAuth } from '../../hooks/useAuth'
 
 const initialState = { first_name: "", last_name: "", email: "", password: "", confirmPassword: "" };
 
 const Auth = () => {
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state) => state.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
+    const location = useLocation();
+    const from = "/admin";
+    const auth = useAuth()
     const [form, setForm] = useState(initialState);
     const [mode, setMode] = useState("login");
     const [showPassword, setShowPassword] = useState(false);
@@ -23,11 +26,8 @@ const Auth = () => {
         setShowPassword(false);
     };
 
-    useEffect(() => {
-        if (user.id != null) {
-            navigate("/choose");
-        }
-    }, [user]);
+   
+
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = (e) => {
@@ -35,13 +35,13 @@ const Auth = () => {
 
         switch (mode) {
             case "login":
-                dispatch(signin({email:form.email, password:form.password}));
+                dispatch(signin({ email: form.email, password: form.password }));
                 break;
             case "reg":
                 dispatch(signup(form));
                 break;
             case "forgottenPW":
-                dispatch(forgottenPW({email:form.email}));
+                dispatch(forgottenPW({ email: form.email }));
                 break;
             default:
                 break;
@@ -73,7 +73,7 @@ const Auth = () => {
                     {mode == "login" && "Bejelentkezés"}
                     {mode == "forgottenPW" && "Elfelejtett jelszó"}
                 </Typography>
-                <Form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit}>
                     <Grid container spacing={2} minWidth={"40rem"} maxWidth={"60rem"}>
                         {mode == "reg" && (
                             <>
@@ -124,7 +124,8 @@ const Auth = () => {
                             )}
                         </Grid>
                     </Grid>
-                </Form>
+                </form>
+                <Button variant="contained" onClick={()=>{console.log(auth.user)}}>klikkelj meg</Button>
             </Paper>
         </Box>
     );

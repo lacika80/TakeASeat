@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, Outlet, redirect, useHistory, useLocation, useNavigate } from "react-router-dom";
 import decode from "jwt-decode";
-import { logout, loginWithToken } from "../../features/userSlice";
+import { logout, loginWithToken } from "../../features/authSlice";
 
 const Home = () => {
     const navigate = useNavigate();

@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import userReducer from '../features/userSlice'
+import authReducer from '../features/authSlice'
 import linkReducer from '../features/linkSlice'
 export const store = configureStore({
   reducer:{
-    user: userReducer,
+    auth: authReducer,
     link: linkReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
