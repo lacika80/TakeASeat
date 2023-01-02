@@ -11,13 +11,16 @@ const initialState = () => {
             return {
                 user: {
                     id: ls.result._id,
-                    name: ls.result.name,
+                    firstName: ls.result.first_name,
+                    lastName: ls.result.last_name,
                     email: ls.result.email,
+                    globalPermission: ls.result.global_permission
                 },
                 token: ls.token,
             };
         }
     }
+    console.log("asd");
     return { user: null, token: null };
 };
 
@@ -51,7 +54,7 @@ export const authSlice = createSlice({
         },
         logout: () => {
             localStorage.clear();
-            return initialState;
+            return initialState();
         },
     },
     extraReducers(builder) {
@@ -62,9 +65,14 @@ export const authSlice = createSlice({
             .addCase(signin.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 localStorage.setItem("profile", JSON.stringify({ ...action?.payload }));
-                state.user.id = action.payload.result._id;
-                state.user.name = action.payload.result.name;
-                state.user.email = action.payload.result.email;
+                state.user = {
+                    id: action.payload.result._id,
+                    firstName: action.payload.result.first_name,
+                    lastName: action.payload.result.last_name,
+                    email: action.payload.result.email,
+                    globalPermission: action.payload.result.global_permission
+
+                };
                 state.token = action.payload.token;
             })
             .addCase(signin.rejected, (state, action) => {

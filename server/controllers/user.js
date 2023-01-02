@@ -11,7 +11,6 @@ import moment from 'moment';
 dotenv.config();
 
 export const signin = async (req, res) => {
-    req.io.emit("test", {data: `Email cím: ${req.body.email}`})
     const { email, password } = req.body;
 
     try {

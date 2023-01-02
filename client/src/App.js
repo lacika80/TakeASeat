@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { createBrowserRouter, createRoutesFromElements, Route, Routes, RouterProvider } from "react-router-dom";
-import RequireAuth from "./components/RequireAuth";
+import { createBrowserRouter, createRoutesFromElements, Route, Routes, RouterProvider, Outlet } from "react-router-dom";
+import RequireGPerm from "./features/RequireGPerm";
 
 import Navbar from "./components/Navbar/Navbar";
 import Home from "./components/Home/Home";
@@ -13,10 +13,12 @@ import Restaurant from "./components/Restaurant/Restaurant";
 import { io } from "socket.io-client";
 import Admin from "./components/Admin/Admin";
 import { Layout } from "./components/Layout/Layout";
-import { loginWithToken } from "./features/authSlice";
 import { useDispatch } from "react-redux";
 
 import decode from "jwt-decode";
+import NoUserGate from "./features/NoUserGate";
+import UserList from "./components/Admin/UserList/UserList";
+import RequireAuth from "./features/RequireAuth";
 
 export default function App() {
     const [socket, setSocket] = useState(null);
@@ -24,7 +26,7 @@ export default function App() {
     useEffect(() => {
         setSocket(io("http://localhost:5000"));
     }, []);
-    useEffect(() => {
+    /*useEffect(() => {
         if (!socket) return;
         socket.on("connect", () => {
             console.log(socket.id);
@@ -32,8 +34,11 @@ export default function App() {
         socket.on("test", (data) => {
             console.log(data);
         });
+        socket.on("refresh-g-users", () => {
+            console.log("ok, frissitem");
+        });
         socket.emit("asd", { as: "ss" });
-    }, [socket]);
+    }, [socket]); */
 
     const ROLES = {
         User: 1,
@@ -42,25 +47,27 @@ export default function App() {
     return (
         <Routes>
             <Route path="/" element={<Layout />}>
-                {/* public routes */}
-                <Route path="Auth" element={<Auth />} />
-                <Route path="verify" element={<Verify />} />
-                <Route path="newpassword" element={<NewPassword />} />
-                {/* we want to protect these routes */}
-                <Route element={<Navbar />}>
-                    <Route path="/" element={<RequireAuth allowedRoles={[ROLES.User]} />}>
-                        <Route index element={<Choose />} />
-                    </Route>
-
-                    <Route path="admin" element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
-                        <Route index element={<Admin />} />
-                    </Route>
-
-                    <Route path="rest" element={<RequireAuth allowedRoles={[ROLES.User, ROLES.Admin]} />}>
-                        <Route index element={<Restaurant />} />
-                    </Route>
+                <Route path="/" element={<NoUserGate />}>
+                    {/* public routes */}
+                    <Route path="Auth" element={<Auth />} />
+                    <Route path="verify" element={<Verify />} />
+                    <Route path="newpassword" element={<NewPassword />} />
                 </Route>
-                {/* catch all */}
+                {/* we want to protect these routes */}
+                <Route element={<RequireAuth />}>
+                    <Route element={<Navbar />}>
+                        <Route index element={<Choose />} />
+                        <Route index element={<Restaurant />} />
+
+                        <Route path="admin" element={<RequireGPerm allowedRoles={[ROLES.Admin]} />}>
+                            <Route index element={<Admin />} />
+                        </Route>
+                        <Route path="userlist" element={<RequireGPerm allowedRoles={[process.env.REACT_APP_G_LIST_USERS]} />}>
+                            <Route index element={<UserList socket={socket} />} />
+                        </Route>
+                    </Route>
+                    {/* catch all */}
+                </Route>
             </Route>
         </Routes>
     );

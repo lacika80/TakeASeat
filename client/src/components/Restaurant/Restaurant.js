@@ -7,7 +7,7 @@ function Restaurant() {
 
     return (
         <div>
-            <Button component={Link} variant="contained" to="/choose">
+            <Button component={Link} variant="contained" to="/">
                 choose
             </Button>
         </div>

@@ -14,7 +14,6 @@ const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const from = "/admin";
     const auth = useAuth()
     const [form, setForm] = useState(initialState);
     const [mode, setMode] = useState("login");
@@ -125,7 +124,7 @@ const Auth = () => {
                         </Grid>
                     </Grid>
                 </form>
-                <Button variant="contained" onClick={()=>{console.log(auth.user)}}>klikkelj meg</Button>
+                <Button variant="contained" onClick={()=>{console.log(auth)}}>klikkelj meg</Button>
             </Paper>
         </Box>
     );

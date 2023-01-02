@@ -36,3 +36,11 @@ export const getEmailFromToken = (data) =>
     }).catch(function (error) {
         return { error: error.response.data.error };
     });
+export const getAllUser = () =>
+    API.post("/admin/getAllUser").catch(function (error) {
+        return { error: error.response.data.error };
+    });
+export const modifyGPerm = (data) =>
+    API.post("/admin/modifyGPerm", data).catch(function (error) {
+        return { error: error.response.data.error };
+    });

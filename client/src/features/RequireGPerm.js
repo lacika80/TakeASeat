@@ -2,20 +2,15 @@ import { useEffect } from "react";
 import { useLocation, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from '../hooks/useAuth'
 
-const RequireAuth = ({ allowedRoles }) => {
+const RequireGPerm = ({ allowedRoles }) => {
     const auth = useAuth()
     const location = useLocation();
-
-
-    useEffect(() => {
-        console.log(auth.user);
-    }, [])
     
-    return auth.user ? (
+    return auth.user.globalPermission & allowedRoles ? (
         <Outlet />
       ) : (
-        <Navigate to="/auth" state={{ from: location }} />
+        <Navigate to="/" state={{ from: location }} />
       )
 };
 
-export default RequireAuth;
+export default RequireGPerm;
