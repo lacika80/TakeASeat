@@ -28,9 +28,19 @@ export const verify = (data) =>
         return { error: error.response.data.error };
     });
 
-    export const getEmailFromToken = (data) =>
-    API.get(`/verify/getEmail`,{
+export const getEmailFromToken = (data) =>
+    API.get(`/verify/getEmail`, {
         params: {
-token: data.token        }}).catch(function (error) {
+            token: data.token,
+        },
+    }).catch(function (error) {
+        return { error: error.response.data.error };
+    });
+export const getAllUser = () =>
+    API.post("/admin/getAllUser").catch(function (error) {
+        return { error: error.response.data.error };
+    });
+export const modifyGPerm = (data) =>
+    API.post("/admin/modifyGPerm", data).catch(function (error) {
         return { error: error.response.data.error };
     });

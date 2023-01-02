@@ -55,7 +55,10 @@ export const tokenIsValid = async (link) => {
 };
 const verifyLink = async (link) => {
     const date = new Date();
-    await UserModel.findByIdAndUpdate(link.receiver_id, { is_verified: true, global_permission: 1 }, { new: true });
+    const user = UserModel.findById(link.receiver_id);
+    let { global_permission } = user;
+    global_permission += parseInt(2);
+    await UserModel.findByIdAndUpdate(link.receiver_id, { is_verified: true, global_permission }, { new: true });
     await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: date }, { new: true });
 };
 
