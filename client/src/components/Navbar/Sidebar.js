@@ -1,3 +1,8 @@
+
+//----------------
+//---------------- OUT OF USE - Later want to integrate for table reservation
+//----------------
+
 import React, { useState } from 'react'
 
 import { styled, useTheme } from "@mui/material/styles";

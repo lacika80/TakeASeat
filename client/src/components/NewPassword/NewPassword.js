@@ -19,15 +19,16 @@ const Verify = () => {
     const [showPassword, setShowPassword] = useState(false);
 
     const handleShowPassword = () => setShowPassword(!showPassword);
-
+    //when the page loaded this check the token for validation and get the email.
     useEffect(() => {
         dispatch(getEmailFromToken(searchParams.get("token")));
     }, []);
-    useEffect(()=>{
-    if (link) {
-        setForm({ ...form, email: link.receiver_email });
-    }
-    }, [link])
+    //when the token gives the email for the state then it fills the field
+    useEffect(() => {
+        if (link) {
+            setForm({ ...form, email: link.receiver_email });
+        }
+    }, [link]);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = async (e) => {

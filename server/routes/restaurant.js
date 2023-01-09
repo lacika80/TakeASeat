@@ -8,7 +8,7 @@ import auth from "../middleware/auth.js";
 router.get("/", auth, getRestaurants);
 router.get("/:id", auth, getRestaurant);
 
-router.post("/create", auth, createRestaurant);
+router.post("/", auth, createRestaurant);
 
 router.patch("/:id", auth, updateRestaurant);
 

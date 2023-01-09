@@ -12,6 +12,18 @@ const userSchema = mongoose.Schema({
         default: new Date(),
     },
     global_permission: { type: Number, default: 1 },
+    restaurants: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Restaurant",
+        },
+    ],
+    permissions: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "RestPermission",
+        },
+    ],
 });
 
 export default mongoose.model("User", userSchema);

@@ -5,7 +5,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Input from "./Input";
 import { Navigate, redirect, useLocation, useNavigate } from "react-router-dom";
 import { logout, registration, signin, getStatus, signup, forgottenPW } from "../../features/authSlice";
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth } from "../../hooks/useAuth";
 
 const initialState = { first_name: "", last_name: "", email: "", password: "", confirmPassword: "" };
 
@@ -14,8 +14,9 @@ const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const auth = useAuth()
+    const auth = useAuth();
     const [form, setForm] = useState(initialState);
+    //reg-login-forgottenpw changer
     const [mode, setMode] = useState("login");
     const [showPassword, setShowPassword] = useState(false);
     const handleShowPassword = () => setShowPassword(!showPassword);
@@ -25,13 +26,9 @@ const Auth = () => {
         setShowPassword(false);
     };
 
-   
-
-
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
     const handleSubmit = (e) => {
         e.preventDefault();
-
         switch (mode) {
             case "login":
                 dispatch(signin({ email: form.email, password: form.password }));
@@ -46,20 +43,6 @@ const Auth = () => {
                 break;
         }
     };
-
-    /*return (
-        <Form onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-                <Input name="email" label="Email Address" handleChange={handleChange} type="email" />
-                <Input name="password" label="Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword} />
-            </Grid>
-            <Button type="submit" fullWidth variant="contained" color="primary">
-                sign in
-            </Button>
-
-            <Grid container justify="flex-end"></Grid>
-        </Form>
-    );*/
 
     return (
         <Box component="main" maxWidth="xs" sx={{ display: "flex", justifyContent: "center", alignItems: "center", m: 1, p: 1 }}>
@@ -124,7 +107,14 @@ const Auth = () => {
                         </Grid>
                     </Grid>
                 </form>
-                <Button variant="contained" onClick={()=>{console.log(auth)}}>klikkelj meg</Button>
+                <Button
+                    variant="contained"
+                    onClick={() => {
+                        console.log(auth);
+                    }}
+                >
+                    klikkelj meg
+                </Button>
             </Paper>
         </Box>
     );

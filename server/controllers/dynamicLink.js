@@ -7,9 +7,10 @@ import UserModel from "../models/user.js";
 import DynamicLinkModel from "../models/dynamicLink.js";
 dotenv.config();
 
+//token using landing func
 export const useLink = async (req, res) => {
     const link = await getDyniamicLink(req.body.token);
-   
+
     const { password, confirmPassword } = req.body;
     if (!(await tokenIsValid(link))) return res.status(405).json({ error: "Token nem érvényes" });
     switch (link.type) {
@@ -39,20 +40,24 @@ export const useLink = async (req, res) => {
             break;
     }
 };
+//set new password and closes the token
 const resetPasswordLink = async (link, password) => {
     await UserModel.findByIdAndUpdate(link.receiver_id, { password: await bcrypt.hash(password, 12) }, { new: true });
     await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: new Date() }, { new: true });
 };
+//gives back the full data modell with the given token
 export const getDyniamicLink = async (token) => {
     const link = await DynamicLinkModel.findOne({ link: token });
     return link;
 };
+//token check
 export const tokenIsValid = async (link) => {
     if (!link) return false;
     const date = new Date();
     if (date > link.date_valid_until || link.date_of_used) return false;
     return true;
 };
+//verifies the email and closes the token
 const verifyLink = async (link) => {
     const date = new Date();
     const user = UserModel.findById(link.receiver_id);
@@ -61,7 +66,7 @@ const verifyLink = async (link) => {
     await UserModel.findByIdAndUpdate(link.receiver_id, { is_verified: true, global_permission }, { new: true });
     await DynamicLinkModel.findByIdAndUpdate(link._id, { date_of_used: date }, { new: true });
 };
-
+//gets the datas from the given token and return back
 export const getEmailFromLink = async (req, res) => {
     if (!req.query.token) return res.status(405).json({ error: "Hibás token" });
     const link = await getDyniamicLink(req.query.token);

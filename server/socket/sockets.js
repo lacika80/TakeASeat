@@ -1,6 +1,10 @@
+//used for checking but it's all. if needed then later will use for other things
+
 /* import TypingController from "./controllers/TypingController.js";
 import RoomController from "./controllers/RoomController.js";
 import MessageController from "./controllers/MessageController.js"; */
+
+import { getEmailFromToken } from "../features/lib.js";
 
 const sockets = (socket) => {
     /* const typingController = new TypingController(socket);
@@ -13,9 +17,12 @@ const sockets = (socket) => {
     socket.on("room-removed", roomController.roomRemoved);
     socket.on("typing-stoped", typingController.typingStoped);
     socket.on("disconnect", typingController.disconnect); */
-    socket.on("asd", (socket) =>{
+    socket.on("asd", (socket) => {
         console.log(socket);
-    })
-    console.log("a user connected");
+    });
+    socket.on("disconnect", function () {
+        delete socket.users[socket.id];
+    });
+    console.log(`A user connected with socketId of "${socket.id}" and ${getEmailFromToken(socket.handshake.auth.token)}`);
 };
 export default sockets;

@@ -2,9 +2,19 @@ import mongoose from "mongoose";
 
 const dynamicLinkSchema = mongoose.Schema({
     type: { type: Number, required: true },
-    sender_id: { type: String},
-    restaurant_id: { type: String },
-    receiver_id: { type: String },
+    sender_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      },
+      receiver_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+      },
+      restaurant_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Restaurant"
+      },
     email: { type: String, required: true },
     date_of_created: {
         type: Date,

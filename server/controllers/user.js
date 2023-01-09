@@ -7,12 +7,11 @@ import UserModel from "../models/user.js";
 import DynamicLinkModel from "../models/dynamicLink.js";
 import { createTransport } from "nodemailer";
 import { getDyniamicLink, tokenIsValid } from "./dynamicLink.js";
-import moment from 'moment';
+import moment from "moment";
 dotenv.config();
 
 export const signin = async (req, res) => {
     const { email, password } = req.body;
-
     try {
         const user = await UserModel.findOne({ email });
 
@@ -23,13 +22,18 @@ export const signin = async (req, res) => {
         if (!isPasswordCorrect) return res.status(400).json({ error: "Érvénytelen azonosítási adatok" });
 
         const token = jwt.sign({ email: user.email, id: user._id }, process.env.SECRET, { expiresIn: "24h" });
-
-        res.status(200).json({ result: user, token });
+        delete user.email; //idk why can't delete this...
+        res.status(200).json({ user, token });
     } catch (err) {
         res.status(500).json({ error: "Valami félrement" });
     }
 };
-
+//alias user check
+export const relogin = async (req, res) => {
+    const token = jwt.sign({ email: req.user.email, id: req.user._id }, process.env.SECRET, { expiresIn: "24h" });
+    res.status(200).json({ user: req.user, token });
+};
+//registration
 export const signup = async (req, res) => {
     const { email, password, first_name, last_name, invite_token } = req.body;
     try {
@@ -51,15 +55,16 @@ export const signup = async (req, res) => {
         }
 
         const token = jwt.sign({ email: result.email, id: result._id }, process.env.SECRET, { expiresIn: "24h" });
-
-        res.status(201).json({ result, token });
+        delete result.password;
+        //gives back the user without password for the fluent login
+        res.status(201).json({ user: result, token });
     } catch (error) {
         res.status(500).json({ error: "Valami félrement" });
 
         console.log(error);
     }
 };
-
+//gives an email with token for password reset
 export const forgottenpw = async (req, res) => {
     const { email } = req.body;
     const user = await UserModel.findOne({ email });
@@ -73,6 +78,7 @@ export const forgottenpw = async (req, res) => {
         console.log(error);
     }
 };
+//this creates the email and send it
 const createEmail = async (user, type) => {
     let link = crypto.randomBytes(32).toString("hex");
 
@@ -81,7 +87,7 @@ const createEmail = async (user, type) => {
 
     switch (type) {
         case process.env.DYNAMIC_LINK_VERIFY_EMAIL:
-            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, 'd'), link });
+            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, "d"), link });
 
             mailOptions = {
                 to: user.email,
@@ -91,7 +97,7 @@ const createEmail = async (user, type) => {
             break;
 
         case process.env.DYNAMIC_LINK_FORGOTTENPW_EMAIL:
-            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, 'h'), link });
+            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, "h"), link });
 
             mailOptions = {
                 to: user.email,

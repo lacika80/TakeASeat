@@ -5,11 +5,12 @@ import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-d
 import { logout } from "../../features/authSlice";
 import { useAuth } from "../../hooks/useAuth";
 import MenuIcon from "@mui/icons-material/Menu";
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
+import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid from '@mui/material/Grid';
 
 export default function Navbar() {
+    const user = useSelector((state)=>state.auth.user)
     const dispatch = useDispatch();
-    const user = useAuth().user;
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -19,29 +20,34 @@ export default function Navbar() {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static" sx={{ mb: 2 }}>
                 <Toolbar>
+                   {/*  still not really know how will this look like */}
                     {/* <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-                        <MenuIcon />
+                        <MenuIcon /> 
                     </IconButton> */}
-                    <Grid2 justify="space-between" container>
-                        <Grid2 item>
+                    <Grid justifyContent="space-between" container  alignItems="center">
+                        <Grid item>
                             <Button color="inherit" component={Link} to="/">
-                                <Typography>Étterem választó </Typography>
+                                Étterem választó 
                             </Button>
                             <Button color="inherit" component={Link} to="/userlist">
-                                <Typography>Felhasználók</Typography>
+                               Felhasználók
                             </Button>
-                        </Grid2>
-                        <Grid2 item>
+                        </Grid>
+                        <Grid item>
+                            <Typography>{user.lastName+" "+user.firstName}</Typography>
+                        </Grid>
+                        <Grid item>
+                        
                             <Button
                                 color="inherit"
                                 onClick={async () => {
                                     dispatch(logout());
                                 }}
                             >
-                                <Typography>Kijelentkezés </Typography>
+                                Kijelentkezés 
                             </Button>
-                        </Grid2>
-                    </Grid2>
+                        </Grid>
+                    </Grid>
                 </Toolbar>
             </AppBar>
             <Outlet />

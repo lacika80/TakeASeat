@@ -1,3 +1,6 @@
+//----------------
+//---------------- OUT OF USE - old layout... checking page
+//----------------
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, Outlet, redirect, useHistory, useLocation, useNavigate } from "react-router-dom";

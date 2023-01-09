@@ -9,35 +9,28 @@ const UserList = ({ socket }) => {
     const userList = useSelector((state) => state.userList);
     const user = useSelector((state) => state.auth.user);
 
-    let listItems;
     const dispatch = useDispatch();
 
+    //get the userlist when page opened
     useEffect(() => {
         dispatch(getAllUser());
     }, []);
+    //setup the pages's sockets
     useEffect(() => {
         if (socket) {
-            socket.on("connect", () => {
-                console.log(socket.id);
-            });
+            //refreshes the userlist when the server give a command for that
             socket.on("refresh-g-users", () => {
                 dispatch(getAllUser());
             });
             return () => {
+                //when leave the page cleaning the listener
                 socket.off("refresh-g-users");
             };
         }
     }, [socket]);
-
-    useEffect(() => {
-        if (userList.users) {
-            listItems = userList.users.map((user) => <li key={user._id}>{user.last_name + " " + user.first_name}</li>);
-        }
-        console.log(listItems);
-    }, [userList]);
-
+    //checkbox creator
     const CheckGPerm = (userId, userPerm, perm) => {
-        console.log(userPerm);
+        //when the list user is the actual user, then the checkboxs are disabled
         if (userId == user.id) {
             if (userPerm & perm) return <Checkbox key={userId + "-" + perm} defaultChecked onChange={(e, data) => handleChange(userId + "-" + perm, data)} disabled></Checkbox>;
             else return <Checkbox key={userId + "-" + perm} onChange={(e, data) => handleChange(userId + "-" + perm, data)} disabled></Checkbox>;
@@ -46,6 +39,7 @@ const UserList = ({ socket }) => {
             else return <Checkbox key={userId + "-" + perm} onChange={(e, data) => handleChange(userId + "-" + perm, data)}></Checkbox>;
         }
     };
+    //on every checkbox click will an active modification in the users' permission. not need for confirmation
     const handleChange = async (key, data) => {
         try {
             if (data) {

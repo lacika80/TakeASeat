@@ -14,6 +14,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { createBrowserRouter, createRoutesFromElements, Link, Navigate, Outlet, RouterProvider, useLocation } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+//maretial ui dark theme switcher
 const darkTheme = createTheme({
     palette: {
         mode: "dark",

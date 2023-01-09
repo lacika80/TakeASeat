@@ -3,18 +3,19 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { verify } from "../../features/linkSlice";
-
+//landing page for email verification
 const Verify = () => {
     const dispatch = useDispatch();
     const [searchParams, setSearchParams] = useSearchParams();
     const link = useSelector((state) => state.link);
-
+//on loaded try to verify the given token
     useEffect(() => {
         dispatch(verify({token:searchParams.get("token")}));
     }, []);
 
     return (
         <Box maxWidth="xs" sx={{display: "flex", justifyContent: "center", p: 2 }}>
+            {/* Gives back the token validation result */}
             <Paper elevation={3} sx={{width: "80%", display: "flex", justifyContent: "center", p: 1}}>
                 {link.status == "loading" && <Typography variant="h5">loading...</Typography>}
                 {link.status == "succeeded" && <Typography variant="h5">{link.message}</Typography>}

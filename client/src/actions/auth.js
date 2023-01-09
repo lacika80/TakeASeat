@@ -1,3 +1,6 @@
+//----------------
+//---------------- OUT OF USE
+//----------------
 import { AUTH } from "../constants/actionTypes";
 import * as api from "../api/index.js";
 
@@ -7,8 +10,7 @@ export const signin = (formData) => async (dispatch) => {
         dispatch({ type: AUTH, data });
 
         //router.push('/');
-    } catch (error) {
-    }
+    } catch (error) {}
 };
 
 export const signup = (formData) => async (dispatch) => {
@@ -18,6 +20,5 @@ export const signup = (formData) => async (dispatch) => {
         dispatch({ type: AUTH, data });
 
         //router.push('/');
-    } catch (error) {
-    }
+    } catch (error) {}
 };

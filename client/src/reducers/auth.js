@@ -1,3 +1,6 @@
+//----------------
+//---------------- OUT OF USE - refactored with newer redux and uses slices instead of clean reducers
+//----------------
 import * as actionType from "../constants/actionTypes";
 
 const authReducer = (state = { authData: null }, action) => {
