@@ -4,6 +4,7 @@ import * as api from "../api/index";
 const initialState = {list:null, status:null, message:null};
 export const getMyRestaurants = createAsyncThunk("restaurant", async () => {
     const response = await api.getMyRestaurants();
+    console.log(response);
     return { data: response.data, status: response.status, error: response?.error };
 });
 export const createRestaurant = createAsyncThunk("restaurant/create", async (formData) => {

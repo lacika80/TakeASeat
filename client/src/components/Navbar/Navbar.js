@@ -18,7 +18,7 @@ export default function Navbar() {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static" sx={{ mb: 2 }}>
+            <AppBar position="static" sx={{ mb: 5 }}>
                 <Toolbar>
                    {/*  still not really know how will this look like */}
                     {/* <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>

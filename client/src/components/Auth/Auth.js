@@ -107,14 +107,6 @@ const Auth = () => {
                         </Grid>
                     </Grid>
                 </form>
-                <Button
-                    variant="contained"
-                    onClick={() => {
-                        console.log(auth);
-                    }}
-                >
-                    klikkelj meg
-                </Button>
             </Paper>
         </Box>
     );

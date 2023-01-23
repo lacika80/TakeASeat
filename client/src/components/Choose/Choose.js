@@ -14,6 +14,7 @@ const Choose = ({ socket }) => {
 
     //on page load get the restaurants and config the socket functions
     useEffect(() => {
+        dispatch(getMyRestaurants());
         if (socket) {
             socket.on("refresh-rests", () => {
                 dispatch(getMyRestaurants());
@@ -23,7 +24,6 @@ const Choose = ({ socket }) => {
                 socket.off("refresh-rests");
             };
         }
-        dispatch(getMyRestaurants());
     }, []);
 
     const creatingSwitch = () => {
@@ -58,7 +58,7 @@ const Choose = ({ socket }) => {
                             <TableRow hover key={rest._id}>
                                 <TableCell>{rest._id}</TableCell>
                                 <TableCell>{rest.name}</TableCell>
-                                <TableCell>{rest.creation_date}</TableCell>
+                                <TableCell>{rest.creation_date.slice(0, 10)}</TableCell>
                                 <TableCell>
                                     <Button component={Link} to={"rest/" + rest._id}>
                                         Kiválaszt
