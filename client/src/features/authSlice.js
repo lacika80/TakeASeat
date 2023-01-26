@@ -24,8 +24,6 @@ const initialState = () => {
     return { user: null, token: null };
 };
 
-const USER_URL = "http://localhost:5000/user/signin";
-
 export const signin = createAsyncThunk("auth/signin", async (formData) => {
     const response = await api.signIn(formData);
     return response.data;

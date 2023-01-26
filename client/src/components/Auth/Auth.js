@@ -63,11 +63,11 @@ const Auth = () => {
                                 <Input name="last_name" label="Last Name" handleChange={handleChange} half />
                             </>
                         )}
-                        <Input name="email" label="Email Address" handleChange={handleChange} type="email" value={form.email} />
+                        <Input name="email" label="Email" handleChange={handleChange} type="email" value={form.email} autocomplete="email" />
                         {mode != "forgottenPW" && (
                             <Input
                                 name="password"
-                                label="Password"
+                                label="Jelszó"
                                 handleChange={handleChange}
                                 type={showPassword ? "text" : "password"}
                                 handleShowPassword={handleShowPassword}
