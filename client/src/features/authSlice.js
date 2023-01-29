@@ -16,6 +16,7 @@ const initialState = () => {
                     email: ls.user.email,
                     globalPermission: ls.user.global_permission,
                     isVerified: ls.user.is_verified,
+                    lastActiveRest: ls.user.last_active_rest,
                 },
                 token: ls.token,
             };
@@ -43,6 +44,10 @@ export const relogin = createAsyncThunk("auth/relogin", async () => {
     return response;
 });
 
+export const setACtiveRest = createAsyncThunk("auth/setActiveRest", async (restId) => {
+    const response = await api.setActiveRest(restId);
+    return response;
+});
 export const authSlice = createSlice({
     name: "auth",
     initialState,
@@ -56,6 +61,7 @@ export const authSlice = createSlice({
             state.user.name = ls.user.name;
             state.user.email = ls.user.email;
             state.user.isVerified = ls.user.is_verified;
+            state.user.lastActiveRest = ls.user.last_active_rest;
             state.token = ls.token;
         },
         logout: () => {
@@ -79,6 +85,7 @@ export const authSlice = createSlice({
                     email: action.payload.user.email,
                     globalPermission: action.payload.user.global_permission,
                     isVerified: action.payload.user.is_verified,
+                    lastActiveRest: action.payload.user.last_active_rest,
                 };
                 state.token = action.payload.token;
             })
@@ -95,7 +102,8 @@ export const authSlice = createSlice({
                 state.user.lastName= action.payload.user.last_name,
                 state.user.email= action.payload.user.email,
                 state.user.globalPermission= action.payload.user.global_permission,
-                state.user.isVerified= action.payload.user.is_verified
+                state.user.isVerified= action.payload.user.is_verified,
+                state.user.lastActiveRest= action.payload.user.last_active_rest
             })
            .addCase(relogin.fulfilled, (state, action) => {
               state.status = "succeeded";
@@ -107,6 +115,14 @@ export const authSlice = createSlice({
                 state.user.email= action.payload.data.user.email,
                 state.user.globalPermission= action.payload.data.user.global_permission,
                 state.user.isVerified= action.payload.data.user.is_verified
+                state.user.lastActiveRest= action.payload.data.user.last_active_rest
+            }).addCase(setACtiveRest.fulfilled, (state, action) => {
+                if (action.payload.error) {
+                    state.user.lastActiveRest=null;
+                } else {
+                    state.status = "succeeded";
+                    state.lastActiveRest = "alma";
+                }
             })
     },
 });

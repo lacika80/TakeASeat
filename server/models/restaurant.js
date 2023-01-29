@@ -23,7 +23,13 @@ const restaurantSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "RestPermission"
       }
-    ]
+    ],
+    spaces: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Space"
+        }
+      ]
 });
 
 export default mongoose.model("Restaurant", restaurantSchema);

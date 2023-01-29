@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: process.env.REACT_APP_SERVER_URL });
+const API = axios.create({ baseURL: process.env.REACT_APP_SERVER_URL, timeout: 1000 });
 API.interceptors.request.use((req) => {
     if (localStorage.getItem("profile")) {
         req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem("profile")).token}`;
@@ -65,7 +65,17 @@ export const createRestaurant = (data) =>
     API.post("restaurant", data).catch(function (error) {
         return { error: error.response.data.error };
     });
+export const getActiveRest = (data) =>
+    API.get(`/restaurant/${data}`, {
+        params: {
+            restId: data,
+        },
+    });
 export const updateRestaurant = (data) =>
     API.patch("restaurant", data).catch(function (error) {
+        return { error: error.response.data.error };
+    });
+export const setActiveRest = (restId) =>
+    API.patch(`user/setActiveRest/${restId}`).catch(function (error) {
         return { error: error.response.data.error };
     });

@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import sockets from "./socket/sockets.js";
 import { getIdFromToken } from "./middleware/auth.js";
+import moment from "moment";
 
 const app = express();
 dotenv.config();
@@ -40,6 +41,8 @@ app.get("/", (req, res) => {
 io.on("connection", sockets);
 //added the socket and the activeUsers to the express
 app.use((req, res, next) => {
+    console.log("");
+    console.log(moment().toString());
     req.io = io;
     req.users = activeUsers;
     return next();
@@ -55,7 +58,6 @@ app.use("/verify", dynamicLinkRouter);
 app.use("/admin", adminRouter);
 
 const PORT = process.env.PORT || 5000;
-
 //database connecting
 mongoose.set("strictQuery", false);
 mongoose
