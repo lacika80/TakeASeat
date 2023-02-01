@@ -20,6 +20,7 @@ import NoUserGate from "./features/NoUserGate";
 import UserList from "./components/Admin/UserList/UserList";
 import RequireAuth from "./features/RequireAuth";
 import { relogin } from "./features/authSlice";
+import RestUserList from "./components/Restaurant/RestUserList";
 
 export default function App() {
     const auth = useSelector((state) => state.auth);
@@ -34,7 +35,7 @@ export default function App() {
     useEffect(() => {
         if (!socket) return;
         socket.on("connect", () => {
-            console.log(socket.id);
+            //console.log(socket.id);
         });
         socket.on("test", (data) => {
             console.log(data);
@@ -60,7 +61,6 @@ export default function App() {
                 <Route element={<RequireAuth />}>
                     <Route element={<Navbar />}>
                         <Route index element={<Choose socket={socket} />} />
-                        <Route index element={<Restaurant />} />
 
                         <Route path="admin" element={<RequireGPerm allowedRoles={[process.env.REACT_APP_G_LIST_USERS]} />}>
                             <Route index element={<Admin />} />
@@ -69,6 +69,7 @@ export default function App() {
                             <Route index element={<UserList socket={socket} />} />
                         </Route>
                         <Route path="/rest/:restId" element={<Restaurant />} />
+                        <Route path="/rest/:restId/users" element={<RestUserList />} />
                     </Route>
                 </Route>
             </Route>

@@ -2,8 +2,8 @@
 //---------------- Work In Progress
 //----------------
 import React, { useEffect, useState } from "react";
-import { Box, Button, Divider, Fab, Grid, Paper, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Alert, Box, Button, Divider, Fab, Grid, LinearProgress, Paper, Typography } from "@mui/material";
+import { Link, useParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Container } from "@mui/system";
 import Sidebar from "./Sidebar";
@@ -15,6 +15,11 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import Table from "./Table";
 import TableCreateForm from "./TableCreateForm";
 import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
+import { CheckRPerm } from "../../features/CheckRPerm";
+
+import { getActive } from "../../features/restaurantsSlice";
+import { setACtiveRest } from "../../features/authSlice";
 
 const drawerWidth = 400;
 
@@ -48,24 +53,7 @@ const fabStyle = {
     bottom: 20,
     right: 20,
 };
-const tables = [
-    {
-        id: 1121,
-        name: "beltér",
-        tables: [
-            [
-                { id: 1, name: "asztal 1/1", posx: 1, posy: 1, seats: 6, space: 1121 },
-                { id: 2, name: "asztal 1/2", posx: 1, posy: 2, seats: 3, space: 1121 },
-                { id: 3, name: "asztal 1/3", posx: 1, posy: 3, seats: 4, space: 1121 },
-            ],
-            [
-                { id: 4, name: "asztal 2/1", posx: 2, posy: 1, seats: 2, space: 1121 },
-                { id: 5, name: "asztal 2/2", posx: 2, posy: 2, seats: 1, space: 1121 },
-            ],
-            [{ id: 6, name: "asztal 3/1", posx: 3, posy: 1, seats: 1, space: 1121 }],
-        ],
-    },
-];
+
 /* function compareGrid(a, b) {
     if (a.posx > b.posx || (a.posx == b.posx && a.posy > b.posy)) return 1;
     else return -1;
@@ -73,11 +61,16 @@ const tables = [
 const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableId: "" };
 
 function Restaurant() {
+    const auth = useSelector((state) => state.auth);
+    const user = auth.user;
+    const rest = useSelector((state) => state.restaurants);
     const [addResForm, setAddResForm] = useState(addResInitialState);
-    const [addRes, setAddRes] = useState(true);
-    const [editingTableList, setEditingTableList] = useState(false);
+    const [addRes, setAddRes] = useState(false);
+    const [editingTableList, setEditingTableList] = useState(true);
     const [addTable, setAddTable] = useState(false);
     const [addTablePosX, setAddTablePosX] = useState(0);
+    const dispatch = useDispatch();
+    const { restId } = useParams();
     /**
      * creates the buttons for add table
      * @param {Number} posx which column you would like to add the table
@@ -93,18 +86,30 @@ function Restaurant() {
                         setAddTable(true);
                     }}
                 >
-                    <Typography>table +</Typography>
+                    <Typography> + Asztal</Typography>
                 </Button>
             </Grid>
         );
     };
+    useEffect(() => {
+        dispatch(getActive(restId));
+        if (auth.lastActiveRest != restId) dispatch(setACtiveRest(restId));
+            
+    }, []);
 
     return (
         <>
+            {rest.status == "loading" && <LinearProgress />}
             <Box sx={{ display: "flex" }}>
                 <Main open={addRes}>
-                    <Paper elevation={5} sx={{ position: "relative" }}>
+                    <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
+                        {rest.status == "failed" && (
+                            <Container sx={{ p: 2 }}>
+                                <Alert severity="error">{rest.message}</Alert>
+                            </Container>
+                        )}
                         {/* parent grid */}
+
                         <Grid container spacing={1} sx={{ py: 1 }} direction="row" justifyContent="center" alignItems="center">
                             {/* Button's grid */}
                             <Grid container maxWidth="md" justifyContent="space-around" alignItems="center">
@@ -140,25 +145,41 @@ function Restaurant() {
                                 <Divider />
                             </Container>
                             {/* Tables' grid */}
-                            <Grid container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
-                                {tables &&
-                                    tables[0].tables.map((tableColumn, index) => (
-                                        <Grid container item spacing={2} direction="column" key={index} justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                            {tableColumn.map((table) => (
-                                                <Grid item key={table.id}>
-                                                    <Table table={table} editingTableList={editingTableList} addRes={addRes} addResForm={addResForm} setAddResForm={setAddResForm} />
-                                                </Grid>
-                                            ))}
-                                            {editingTableList && tableAddButton(index)}
-                                        </Grid>
-                                    ))}
-                                {editingTableList && tables[0].tables.length < 4 && (
-                                    <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                        {tableAddButton(tables[0].tables.length)}
+                            {rest.active?.spaces[0]?.tables &&
+                                rest.active.spaces[0].tables.map((space) => (
+                                    <Grid container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                                        {space.tables.map((tableColumn, index) => (
+                                            <Grid container item spacing={2} direction="column" key={index} justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                                {tableColumn.map((table) => (
+                                                    <Grid item key={table.id}>
+                                                        <Table table={table} editingTableList={editingTableList} addRes={addRes} addResForm={addResForm} setAddResForm={setAddResForm} />
+                                                    </Grid>
+                                                ))}
+                                                {editingTableList && tableAddButton(index)}
+                                            </Grid>
+                                        ))}
+                                        {/* -------------------------EZT CHECKOLNI --------------------------------------- */}
+                                        {space.tables.length == 0 && rest.active.permission & process.env.REACT_APP_R_CREATE_TABLE && (
+                                            <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                                {editingTableList && tableAddButton(0)}
+                                            </Grid>
+                                        )}
+                                        {editingTableList && space.length < 4 && (
+                                            <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                                {tableAddButton(space.length)}
+                                            </Grid>
+                                        )}
                                     </Grid>
-                                )}
-                            </Grid>
+                                ))}
+                            {rest.active?.spaces[0]?.tables && rest.active.spaces[0].tables.length == 0 && editingTableList && (
+                                <Grid container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                                    <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                        {editingTableList && tableAddButton(0)}
+                                    </Grid>
+                                </Grid>
+                            )}
                         </Grid>
+
                         {editingTableList ? (
                             <Fab sx={fabStyle} aria-label="add reservation panel" color="primary" disabled>
                                 <AddIcon />
@@ -170,7 +191,15 @@ function Restaurant() {
                         )}
                     </Paper>
                 </Main>
-                <Sidebar DrawerHeader={DrawerHeader} setAddRes={setAddRes} addRes={addRes} drawerWidth={drawerWidth} addResForm={addResForm} setAddResForm={setAddResForm} />
+                <Sidebar
+                    DrawerHeader={DrawerHeader}
+                    setAddRes={setAddRes}
+                    addRes={addRes}
+                    drawerWidth={drawerWidth}
+                    addResForm={addResForm}
+                    setAddResForm={setAddResForm}
+                    tableOpts={rest.active ? (rest.active.tableOpts ? rest.active.tableOpts : []) : []}
+                />
             </Box>
             <TableCreateForm props={{ open: addTable, setOpen: setAddTable, edit: false, table: { posx: addTablePosX } }} />
         </>

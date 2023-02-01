@@ -9,7 +9,7 @@ import moment, { now } from "moment";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 
-export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, addResForm, setAddResForm }) {
+export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, addResForm, setAddResForm, tableOpts }) {
     const handleChange = (e) => {
         if (!((e.target.name == "adult" || e.target.name == "child") && e.target.value < 0)) {
             setAddResForm({ ...addResForm, [e.target.name]: e.target.value });
@@ -29,7 +29,6 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
                 break;
         }
     };
-    const tableOpts = ["kint", "bent", "ablaknál", "dohányzó", "nem dohányzó"];
 
     return (
         <Drawer
@@ -120,7 +119,9 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
                     </Typography>
                 </Grid>
                 <Grid>
-                    <Button variant="contained" fullWidth>Foglalás véglegesítése</Button>
+                    <Button variant="contained" fullWidth>
+                        Foglalás véglegesítése
+                    </Button>
                 </Grid>
             </Grid>
         </Drawer>

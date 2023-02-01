@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema({
+    _id: { type: mongoose.ObjectId, get: (v) => v.toString() },
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     email: { type: String, required: true },
@@ -16,6 +17,7 @@ const userSchema = mongoose.Schema({
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Restaurant",
+            get: (v) => v.toString()
         },
     ],
     permissions: [
@@ -24,6 +26,11 @@ const userSchema = mongoose.Schema({
             ref: "RestPermission",
         },
     ],
+    last_active_rest:  {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Restaurant",
+        get: (v) => v.toString()
+    },
 });
 
 export default mongoose.model("User", userSchema);

@@ -87,11 +87,11 @@ const Choose = ({ socket }) => {
             {/*  if the user is not allowed to create restaurant then the button will disabled */}
             {user.globalPermission & process.env.REACT_APP_G_CREATE_RESTAURANT && user.isVerified ? (
                 <Button onClick={creatingSwitch} variant="contained">
-                    Restaurant
+                    Új étterem létrehozása
                 </Button>
             ) : (
                 <Button variant="contained" disabled>
-                    Restaurant
+                    Új étterem létrehozása
                 </Button>
             )}
         </Paper>

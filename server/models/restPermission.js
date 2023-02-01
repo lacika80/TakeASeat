@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
+import mongooseLong from "mongoose-long";
+mongooseLong(mongoose);
+const {
+    Types: { Long },
+} = mongoose;
 
 const restPermissionSchema = mongoose.Schema({
-    permission: { type: Number, required: true },
+    permission: { type: Long, required: true },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

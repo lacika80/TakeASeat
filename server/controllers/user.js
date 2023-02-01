@@ -13,7 +13,7 @@ dotenv.config();
 export const signin = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ email }).populate("last_active_rest");
 
         if (!user) return res.status(404).json({ error: "Felhasználó nem létezik" });
 
@@ -78,6 +78,17 @@ export const forgottenpw = async (req, res) => {
         console.log(error);
     }
 };
+
+export const setActiveRest = async (req, res) => {
+    try {
+        await UserModel.findByIdAndUpdate(req.userId, {last_active_rest: req.params.resId});
+        return res.status(201);
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        res.status(500).json({ error: "Valami félrement" });
+    }
+};
 //this creates the email and send it
 const createEmail = async (user, type) => {
     let link = crypto.randomBytes(32).toString("hex");
@@ -125,4 +136,17 @@ const createEmail = async (user, type) => {
             console.log("Email sent: " + info.response);
         }
     });
+};
+
+export const inviteToRest = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+export const kickFromTheRest = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+export const EditRestPerm = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+export const restUserList = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
 };

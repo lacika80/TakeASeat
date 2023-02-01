@@ -19,11 +19,28 @@ const restaurantSchema = mongoose.Schema({
         default: new Date(),
     },
     permissions: [
-      {
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "RestPermission",
+        },
+    ],
+    spaces: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Space",
+        },
+    ],
+    openingTimes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "openingTime",
+        },
+    ],
+    global: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "RestPermission"
-      }
-    ]
+        ref: "global",
+        required: true,
+    },
 });
 
 export default mongoose.model("Restaurant", restaurantSchema);
