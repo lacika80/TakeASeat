@@ -137,3 +137,16 @@ const createEmail = async (user, type) => {
         }
     });
 };
+
+export const inviteToRest = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+export const kickFromTheRest = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+export const EditRestPerm = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+export const restUserList = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};

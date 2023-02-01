@@ -2,7 +2,7 @@ import restaurantModel from "../models/restaurant.js";
 import restPermissionModel from "../models/restPermission.js";
 import userModel from "../models/user.js";
 import mongoose from "mongoose";
-import moment from 'moment'
+import moment from "moment";
 
 import SpaceModel from "../models/space.js";
 
@@ -26,6 +26,8 @@ export const createRestaurant = async (req, res) => {
         req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-rests");
         return res.status(201);
     } catch (error) {
+        console.log("error:")
+        console.log(error);
         return res.status(500).json({ error: "Valami félrement" });
     }
 };
@@ -35,7 +37,6 @@ export const getRestaurants = async (req, res) => {
     return res.status(200).json(user.restaurants);
 };
 export const getRestaurant = async (req, res) => {
-   
     let id;
     try {
         id = new mongoose.Types.ObjectId(req.params.id);
@@ -55,4 +56,75 @@ export const getRestaurant = async (req, res) => {
     req.user.restaurants[0] = req.user.restaurants[0].toString();
     console.log(test); */
 };
-export const updateRestaurant = async (req, res) => {};
+
+/*
+implementation guide in hungary:
+
+ */
+export const updateRestaurant = async (req, res) => {
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const getGlobals = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const setGlobal = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const getOpeningHour = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const editOpeningHour = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const getTables = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const createTable = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const editTable = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const deleteTable = async (req, res) =>{
+    return res.status(501).json({ error: "Nincs elkészítve" });
+};
