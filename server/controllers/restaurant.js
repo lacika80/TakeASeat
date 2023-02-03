@@ -5,7 +5,7 @@ import restaurantModel from "../models/restaurant.js";
 import userModel from "../models/user.js";
 import RestPermissionModel from "../models/restPermission.js";
 import SpaceModel from "../models/space.js";
-import GlobalModel from '../models/global.js'
+import GlobalModel from "../models/global.js";
 
 export const createRestaurant = async (req, res) => {
     if (!(req.user.global_permission & process.env.G_CREATE_RESTAURANT)) {
@@ -75,12 +75,11 @@ export const getGlobals = async (req, res) => {
         const { user } = req;
         const restaurantId = req.params.id;
         const userPerm = await RestPermissionModel.findOne({ user_id: user.id, restaurant_id: restaurantId });
-        if (userPerm == null) {
+        if (!((userPerm != null && userPerm.permission & R_VIEW_REST_GLOBALS) || user.global_permission & process.env.G_LOOK_IN_RESTAURANTS)) {
             return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
-        } else {
-            const restaurant = (await restaurantModel.findById(req.params.id).populate("Global")).toObject();
-            return res.status(200).json({ global: restaurant.global });
         }
+        const restaurant = (await restaurantModel.findById(req.params.id).populate("Global")).toObject();
+        return res.status(200).json({ global: restaurant.global });
     } catch (error) {
         console.log("error:");
         console.log(error);
@@ -94,18 +93,25 @@ implementation guide in hungary:
  */
 export const setGlobal = async (req, res) => {
     try {
-        
         const { user } = req;
         const restaurantId = req.params.id;
         const { formdata } = req.body;
         const userPerm = await RestPermissionModel.findOne({ user_id: user.id, restaurant_id: restaurantId });
+        if (
+            !(
+                (userPerm != null && userPerm.permission & R_VIEW_REST_GLOBALS) ||
+                (user.global_permission & process.env.G_LOOK_IN_RESTAURANTS && user.global_permission & process.env.G_EDIT_RESTAURANTS)
+            )
+        ) {
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
         const restaurant = await restaurantModel.findById(restaurantId);
         await GlobalModel.findByIdAndUpdate(restaurant.global, formdata);
         return res.status(200);
     } catch (error) {
         console.log("error:");
         console.log(error);
-        return res.status(500).json({ error: "Valami félrement" }); 
+        return res.status(500).json({ error: "Valami félrement" });
     }
 };
 
@@ -114,7 +120,20 @@ implementation guide in hungary:
 
  */
 export const getOpeningHour = async (req, res) => {
-    return res.status(501).json({ error: "Nincs elkészítve" });
+    try {
+        const { user } = req;
+        const restaurantId = req.params.id;
+        const userPerm = await RestPermissionModel.findOne({ user_id: user.id, restaurant_id: restaurantId });
+        if (!((userPerm != null && userPerm.permission & R_VIEW_REST_GLOBALS) || user.global_permission & process.env.G_LOOK_IN_RESTAURANTS)) {
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
+        const restaurant = (await restaurantModel.findById(req.params.id).populate("openingTimes")).toObject();
+        return res.status(200).json({ OpeningTimes: restaurant.openingTimes });
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
 };
 
 /*
