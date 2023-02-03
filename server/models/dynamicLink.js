@@ -4,17 +4,16 @@ const dynamicLinkSchema = mongoose.Schema({
     type: { type: Number, required: true },
     sender_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-      },
-      receiver_id: {
+        ref: "User",
+    },
+    receiver_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
-      },
-      restaurant_id: {
+    },
+    restaurant_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Restaurant"
-      },
+        ref: "Restaurant",
+    },
     email: { type: String, required: true },
     date_of_created: {
         type: Date,
@@ -22,8 +21,8 @@ const dynamicLinkSchema = mongoose.Schema({
     },
     date_of_used: { type: Date },
     date_valid_until: { type: Date, required: true },
-    permission: { type: Number},
-    global_permission: { type: Number},
+    permission: { type: Number },
+    global_permission: { type: Number },
     link: { type: String, required: true },
 });
 

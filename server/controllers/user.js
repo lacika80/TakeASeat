@@ -3,11 +3,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-import UserModel from "../models/user.js";
-import DynamicLinkModel from "../models/dynamicLink.js";
 import { createTransport } from "nodemailer";
 import { getDyniamicLink, tokenIsValid } from "./dynamicLink.js";
 import moment from "moment";
+
+import UserModel from "../models/user.js";
+import DynamicLinkModel from "../models/dynamicLink.js";
+import RestPermissionModel from "../models/restPermission.js";
+import RestaurantModel from "../models/restaurant.js";
+import notificationModel from "../models/notification.js";
 dotenv.config();
 
 export const signin = async (req, res) => {
@@ -81,7 +85,7 @@ export const forgottenpw = async (req, res) => {
 
 export const setActiveRest = async (req, res) => {
     try {
-        await UserModel.findByIdAndUpdate(req.userId, {last_active_rest: req.params.resId});
+        await UserModel.findByIdAndUpdate(req.userId, { last_active_rest: req.params.resId });
         return res.status(201);
     } catch (error) {
         console.log("error:");
@@ -90,7 +94,7 @@ export const setActiveRest = async (req, res) => {
     }
 };
 //this creates the email and send it
-const createEmail = async (user, type) => {
+const createEmail = async (user, type, message = null) => {
     let link = crypto.randomBytes(32).toString("hex");
 
     let result;
@@ -120,7 +124,10 @@ const createEmail = async (user, type) => {
         default:
             break;
     }
+    await mailSender(mailOptions);
+};
 
+const mailSender = async (mailOptions) => {
     const transporter = createTransport({
         service: "gmail",
         auth: {
@@ -138,15 +145,141 @@ const createEmail = async (user, type) => {
     });
 };
 
-export const inviteToRest = async (req, res) =>{
+/*
+implementation guide in hungary:
+- ellenörzés hogy küldhet-e meghívót
+- személy ellenörzése hogy már regisztrálva van-e
+- Ha igen, akkor értesíté kiküldése
+- Email kiküldése. Amennyiben nincs regisztrálva, úgy regisztrációs linkes, ha regisztrálva van, úgy 1 jelzőt
+
+tud adni jogok? ha nem akkor csak global jogok lehetnek ✓
+szerkesztési jogadási joga van? ha nincs akkor nem adhat jogot se szerkeszteni se jogot adni a szerkesztésre
+ha tud adni jogot, akkor max akkora jogot lehet adni neki mint az őjoga+global 
+ */
+export const inviteToRest = async (req, res) => {
+    try {
+        const { email, message, permission, restaurantId } = req.body;
+        const { user } = req;
+        const restaurant = await RestaurantModel.findById(restaurantId).populate("global");
+        const userPerm = await RestPermissionModel.findOne({ user_id: user.id, restaurant_id: restaurantId });
+        /*
+    basic check
+    */
+        if (userPerm == null || !(process.env.R_INVITE & userPerm.permission) || permission & userPerm.permission) {
+            req.io.to(req.body.socketId).emit("refresh-user");
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
+        /*
+    basic perm check if the user doesnt have edit permission
+    */
+        if (permission != restaurant.global.basicPerm && !(userPerm.permission & process.env.R_EDIT_USERS_PERMISSION)) {
+            req.io.to(req.body.socketId).emit("refresh-user");
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
+        /*
+    edit_user permission check
+    */
+        if (permission & process.env.R_EDIT_USERS_PERMISSION && !(userPerm.permission & process.env.R_PERM_TO_GIVE_EDIT_PERM) && !(restaurant.global.basicPerm & process.env.R_EDIT_USERS_PERMISSION)) {
+            req.io.to(req.body.socketId).emit("refresh-user");
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
+        /*
+    perm edit giving permission check
+    */
+        if (
+            permission & process.env.R_PERM_TO_GIVE_EDIT_PERM &&
+            !(userPerm.permission & process.env.R_PERM_TO_GIVE_EDIT_PERM) &&
+            !(restaurant.global.basicPerm & process.env.R_PERM_TO_GIVE_EDIT_PERM)
+        ) {
+            req.io.to(req.body.socketId).emit("refresh-user");
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
+        /*
+    check that the invited have different perms than the user can give
+    */
+        if (((permission | restaurant.global.basicPerm | userPerm.permission) ^ (userPerm.permission | restaurant.global.basicPerm)) > 0) {
+            req.io.to(req.body.socketId).emit("refresh-user");
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        }
+
+        let link = crypto.randomBytes(32).toString("hex");
+        const invited = await UserModel.findOne({ email });
+        if (invited == null) {
+            await DynamicLinkModel.create({
+                type: 3,
+                sender_id: user.id,
+                email: user.email,
+                restaurant_id: restaurantId,
+                permission,
+                global_permission: 1,
+                date_valid_until: moment().add(24, "h"),
+                link,
+            });
+        } else {
+            await DynamicLinkModel.create({
+                type: 3,
+                sender_id: user.id,
+                receiver_id: invited._id,
+                email: user.email,
+                restaurant_id: restaurantId,
+                permission,
+                global_permission: 1,
+                date_valid_until: moment().add(24, "h"),
+                link,
+            });
+        }
+        const text = message
+            ? `Önt ${user.last_name} ${user.first_name} meghívta, hogy csatlakozzon az étterméhez!
+
+        ${message}
+
+        A meghívás elfogadásához kérem kattintson <a href="${process.env.CLIENT_URL + ":" + process.env.CLIENT_PORT + "/verify?token=" + link}">ide</a>`
+            : `Önt ${user.last_name} ${user.first_name} meghívta, hogy csatlakozzon az étterméhez!
+
+        A meghívás elfogadásához kérem kattintson <a href="${process.env.CLIENT_URL + ":" + process.env.CLIENT_PORT + "/verify?token=" + link}">ide</a>`;
+        const mailOptions = {
+            to: email,
+            subject: "Meghívása érkezett a Take-A-Seat-re",
+            text,
+        };
+        await mailSender(mailOptions);
+
+        if (invited != null) {
+            const notif = await notificationModel.create({
+                message: `${user.last_name} ${user.first_name} meghívta, hogy csatlakozzon az étterméhez!`,
+                acceptable: true,
+                accept: `${process.env.CLIENT_URL + ":" + process.env.CLIENT_PORT + "/verify?token=" + link}`,
+            });
+            UserModel.findByIdAndUpdate(invited._id, { $push: { notifications: notif._id } });
+        }
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
+    return res.status(200);
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const kickFromTheRest = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
-export const kickFromTheRest = async (req, res) =>{
+
+/*
+implementation guide in hungary:
+
+ */
+export const EditRestPerm = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
-export const EditRestPerm = async (req, res) =>{
-    return res.status(501).json({ error: "Nincs elkészítve" });
-};
-export const restUserList = async (req, res) =>{
+
+/*
+implementation guide in hungary:
+
+ */
+export const restUserList = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };

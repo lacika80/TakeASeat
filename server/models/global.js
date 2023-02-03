@@ -7,6 +7,7 @@ const globalSchema = mongoose.Schema({
         default: 90,
     },
     free_time: { type: Number, default: 0 },
+    basicPerm: { type: Number, default: 0 },
     
 });
 

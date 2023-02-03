@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema({
-    _id: { type: mongoose.ObjectId, get: (v) => v.toString() },
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     email: { type: String, required: true },
@@ -31,6 +30,10 @@ const userSchema = mongoose.Schema({
         ref: "Restaurant",
         get: (v) => v.toString()
     },
+    notifications: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification"
+      }],
 });
 
 export default mongoose.model("User", userSchema);
