@@ -1,9 +1,9 @@
-import restaurantModel from "../models/restaurant.js";
-import restPermissionModel from "../models/restPermission.js";
-import userModel from "../models/user.js";
 import mongoose from "mongoose";
 import moment from "moment";
 
+import restaurantModel from "../models/restaurant.js";
+import userModel from "../models/user.js";
+import RestPermissionModel from "../models/restPermission.js";
 import SpaceModel from "../models/space.js";
 
 export const createRestaurant = async (req, res) => {
@@ -14,7 +14,7 @@ export const createRestaurant = async (req, res) => {
     try {
         const space = await SpaceModel.create({});
         const restaurant = await restaurantModel.create({ name: req.body.name, owner: req.userId, spaces: [space._id] });
-        const restperm = await restPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
+        const restperm = await RestPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
         let permissions = restaurant.permissions;
         permissions.push(restperm._id);
         await restaurantModel.findByIdAndUpdate(restaurant._id, { permissions });
@@ -26,7 +26,7 @@ export const createRestaurant = async (req, res) => {
         req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-rests");
         return res.status(201);
     } catch (error) {
-        console.log("error:")
+        console.log("error:");
         console.log(error);
         return res.status(500).json({ error: "Valami félrement" });
     }
@@ -47,7 +47,7 @@ export const getRestaurant = async (req, res) => {
         const restaurant = (await restaurantModel.findById(req.params.id).populate("spaces")).toObject();
         delete restaurant.permissions;
         delete restaurant.users;
-        const restPermission = await restPermissionModel.findOne({ user_id: req.userId, restaurant_id: req.params.id });
+        const restPermission = await RestPermissionModel.findOne({ user_id: req.userId, restaurant_id: req.params.id });
         restaurant.permission = restPermission.permission.toNumber();
         return res.status(200).json({ restaurant });
     } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
@@ -69,7 +69,29 @@ export const updateRestaurant = async (req, res) => {
 implementation guide in hungary:
 
  */
-export const getGlobals = async (req, res) =>{
+export const getGlobals = async (req, res) => {
+    try {
+        const { user } = req;
+        const restaurantId = req.params.id;
+        const userPerm = await RestPermissionModel.findOne({ user_id: user.id, restaurant_id: restaurantId });
+        if (userPerm == null) {
+            return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        } else {
+            const restaurant = (await restaurantModel.findById(req.params.id).populate("Global")).toObject();
+            return res.status(200).json({ global: restaurant.global });
+        }
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
+};
+
+/*
+implementation guide in hungary:
+
+ */
+export const setGlobal = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 
@@ -77,7 +99,7 @@ export const getGlobals = async (req, res) =>{
 implementation guide in hungary:
 
  */
-export const setGlobal = async (req, res) =>{
+export const getOpeningHour = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 
@@ -85,7 +107,7 @@ export const setGlobal = async (req, res) =>{
 implementation guide in hungary:
 
  */
-export const getOpeningHour = async (req, res) =>{
+export const editOpeningHour = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 
@@ -93,7 +115,7 @@ export const getOpeningHour = async (req, res) =>{
 implementation guide in hungary:
 
  */
-export const editOpeningHour = async (req, res) =>{
+export const getTables = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 
@@ -101,7 +123,7 @@ export const editOpeningHour = async (req, res) =>{
 implementation guide in hungary:
 
  */
-export const getTables = async (req, res) =>{
+export const createTable = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 
@@ -109,7 +131,7 @@ export const getTables = async (req, res) =>{
 implementation guide in hungary:
 
  */
-export const createTable = async (req, res) =>{
+export const editTable = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 
@@ -117,14 +139,6 @@ export const createTable = async (req, res) =>{
 implementation guide in hungary:
 
  */
-export const editTable = async (req, res) =>{
-    return res.status(501).json({ error: "Nincs elkészítve" });
-};
-
-/*
-implementation guide in hungary:
-
- */
-export const deleteTable = async (req, res) =>{
+export const deleteTable = async (req, res) => {
     return res.status(501).json({ error: "Nincs elkészítve" });
 };

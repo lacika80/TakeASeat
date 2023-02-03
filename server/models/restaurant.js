@@ -38,7 +38,7 @@ const restaurantSchema = mongoose.Schema({
     ],
     global: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "global",
+        ref: "Global",
         required: true,
     },
 });
