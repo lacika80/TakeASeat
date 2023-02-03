@@ -5,6 +5,7 @@ import restaurantModel from "../models/restaurant.js";
 import userModel from "../models/user.js";
 import RestPermissionModel from "../models/restPermission.js";
 import SpaceModel from "../models/space.js";
+import GlobalModel from '../models/global.js'
 
 export const createRestaurant = async (req, res) => {
     if (!(req.user.global_permission & process.env.G_CREATE_RESTAURANT)) {
@@ -92,7 +93,20 @@ implementation guide in hungary:
 
  */
 export const setGlobal = async (req, res) => {
-    return res.status(501).json({ error: "Nincs elkészítve" });
+    try {
+        
+        const { user } = req;
+        const restaurantId = req.params.id;
+        const { formdata } = req.body;
+        const userPerm = await RestPermissionModel.findOne({ user_id: user.id, restaurant_id: restaurantId });
+        const restaurant = await restaurantModel.findById(restaurantId);
+        await GlobalModel.findByIdAndUpdate(restaurant.global, formdata);
+        return res.status(200);
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" }); 
+    }
 };
 
 /*
