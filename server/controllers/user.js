@@ -257,6 +257,8 @@ export const inviteToRest = async (req, res) => {
         console.log(error);
         return res.status(500).json({ error: "Valami félrement" });
     }
+    const socketList = invited ? CreateSocketList(req.users, invited._id.toString()) : null;
+    if (socketList) req.io.to(socketList).emit("notificaion");
     return res.status(200);
 };
 
