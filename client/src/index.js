@@ -12,8 +12,8 @@ import { reducers } from "./reducers";
 import App from "./App";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { createBrowserRouter, createRoutesFromElements, Link, Navigate, Outlet, RouterProvider, useLocation } from "react-router-dom";
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 //maretial ui dark theme switcher
@@ -32,14 +32,16 @@ const darkTheme = createTheme({
     </React.StrictMode> */
 }
 root.render(
-    <Provider store={store}>
-        <ThemeProvider theme={darkTheme}>
-            <LocalizationProvider dateAdapter={AdapterMoment}>
-                <BrowserRouter>
-                    <App />
-                </BrowserRouter>
-            </LocalizationProvider>
-        </ThemeProvider>
-    </Provider>
+    <React.StrictMode>
+        <Provider store={store}>
+            <ThemeProvider theme={darkTheme}>
+                <LocalizationProvider dateAdapter={AdapterMoment}>
+                    <BrowserRouter>
+                        <App />
+                    </BrowserRouter>
+                </LocalizationProvider>
+            </ThemeProvider>
+        </Provider>
+    </React.StrictMode>
 );
 //reportWebVitals(console.log);

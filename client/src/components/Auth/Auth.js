@@ -1,20 +1,21 @@
-import { Avatar, Button, Paper, Grid, Typography, Container, Box } from "@mui/material";
+import { Avatar, Button, Paper, Grid, Typography, Container, Box, Alert, Stack } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Input from "./Input";
 import { Navigate, redirect, useLocation, useNavigate } from "react-router-dom";
-import { logout, registration, signin, getStatus, signup, forgottenPW } from "../../features/authSlice";
+import { logout, registration, signin, getStatus, signup, forgottenPW, clearError } from "../../features/authSlice";
 import { useAuth } from "../../hooks/useAuth";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const initialState = { first_name: "", last_name: "", email: "", password: "", confirmPassword: "" };
 
 const Auth = () => {
-    const user = useSelector((state) => state.auth.user);
+    const auth = useSelector((state) => state.auth);
+    const user = auth.user;
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const auth = useAuth();
     const [form, setForm] = useState(initialState);
     //reg-login-forgottenpw changer
     const [mode, setMode] = useState("login");
@@ -22,6 +23,7 @@ const Auth = () => {
     const handleShowPassword = () => setShowPassword(!showPassword);
 
     const switchMode = (type) => {
+        dispatch(clearError());
         setMode(type);
         setShowPassword(false);
     };
@@ -34,7 +36,10 @@ const Auth = () => {
                 dispatch(signin({ email: form.email, password: form.password }));
                 break;
             case "reg":
-                dispatch(signup(form));
+                dispatch(signup(form))/* 
+                    .then(unwrapResult)
+                    .then((obj) => console.log({ obj }))
+                    .catch((obj) => console.log({ objErr: obj })); */
                 break;
             case "forgottenPW":
                 dispatch(forgottenPW({ email: form.email }));
@@ -56,7 +61,7 @@ const Auth = () => {
                     {mode == "forgottenPW" && "Elfelejtett jelszó"}
                 </Typography>
                 <form onSubmit={handleSubmit}>
-                    <Grid container spacing={2} minWidth={"40rem"} maxWidth={"60rem"}>
+                    <Stack spacing={2} minWidth={"40rem"} maxWidth={"60rem"}>
                         {mode == "reg" && (
                             <>
                                 <Input name="first_name" label="First Name" handleChange={handleChange} autoFocus half />
@@ -75,7 +80,9 @@ const Auth = () => {
                             />
                         )}
                         {mode == "reg" && <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type="password" autocomplete="new-password" />}
-                    </Grid>
+
+                        {auth.error && <Alert severity="error"> {auth.error}</Alert>}
+                    </Stack>
                     <Button type="submit" fullWidth variant="contained" color="primary" sx={{ my: 2 }}>
                         {mode == "reg" && "regisztráció"}
                         {mode == "login" && "Bejelentkezés"}

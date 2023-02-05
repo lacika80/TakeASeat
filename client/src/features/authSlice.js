@@ -5,34 +5,47 @@ import jwtDecode from "jwt-decode";
 
 const initialState = () => {
     const ls = JSON.parse(localStorage.getItem("profile"));
-    if (ls) {
-        const decodedToken = jwtDecode(ls.token);
-        if (decodedToken.exp * 1000 > new Date().getTime()) {
-            return {
-                user: {
-                    id: ls.user._id,
-                    firstName: ls.user.first_name,
-                    lastName: ls.user.last_name,
-                    email: ls.user.email,
-                    globalPermission: ls.user.global_permission,
-                    isVerified: ls.user.is_verified,
-                    lastActiveRest: ls.user.last_active_rest,
-                },
-                token: ls.token,
-            };
+    try {
+        if (ls) {
+            const decodedToken = jwtDecode(ls.token);
+            if (decodedToken.exp * 1000 > new Date().getTime()) {
+                return {
+                    user: {
+                        id: ls.user.id,
+                        firstName: ls.user.first_name,
+                        lastName: ls.user.last_name,
+                        email: ls.user.email,
+                        globalPermission: ls.user.global_permission,
+                        isVerified: ls.user.is_verified,
+                        lastActiveRest: ls.user.last_active_rest??null,
+                    },
+                    token: ls.token,
+                };
+            }
         }
+    } catch (error) {
+        console.log("drop");
+        localStorage.removeItem("profile");
     }
-    return { user: null, token: null };
+    return { user: null, token: null, error: null };
 };
 
-export const signin = createAsyncThunk("auth/signin", async (formData) => {
-    const response = await api.signIn(formData);
-    return response.data;
+export const signin = createAsyncThunk("auth/signin", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.signIn(formData);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 
-export const signup = createAsyncThunk("auth/signup", async (formData) => {
-    const response = await api.signUp(formData);
-    return response.data;
+export const signup = createAsyncThunk("auth/signup", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.signUp(formData);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 
 export const forgottenPW = createAsyncThunk("auth/forgottenpw", async (formData) => {
@@ -65,69 +78,87 @@ export const authSlice = createSlice({
             state.token = ls.token;
         },
         logout: () => {
-            console.log("bent");
             localStorage.clear();
             return initialState();
+        },
+        clearError: (state) => {
+            state.error = null;
         },
     },
     extraReducers: (builder) => {
         builder
             .addCase(signin.pending, (state, action) => {
                 state.status = "loading";
+                state.error = null;
             })
             .addCase(signin.fulfilled, (state, action) => {
                 state.status = "succeeded";
-                localStorage.setItem("profile", JSON.stringify({ ...action?.payload }));
+                console.log(action);
+                 localStorage.setItem("profile", JSON.stringify({ ...action?.payload?.data }));
                 state.user = {
-                    id: action.payload.user._id,
-                    firstName: action.payload.user.first_name,
-                    lastName: action.payload.user.last_name,
-                    email: action.payload.user.email,
-                    globalPermission: action.payload.user.global_permission,
-                    isVerified: action.payload.user.is_verified,
-                    lastActiveRest: action.payload.user.last_active_rest,
+                    id: action.payload.data.user.id,
+                    firstName: action.payload.data.user.first_name,
+                    lastName: action.payload.data.user.last_name,
+                    email: action.payload.data.user.email,
+                    globalPermission: action.payload.data.user.global_permission,
+                    isVerified: action.payload.data.user.is_verified,
+                    lastActiveRest: action.payload.data.user.last_active_rest??null,
                 };
-                state.token = action.payload.token;
+                state.token = action.payload.data.token;
             })
             .addCase(signin.rejected, (state, action) => {
                 state.status = "failed";
-                state.error = action.error.message;
+                state.user = null;
+                state.error = action.payload.data.error;
+            })
+            .addCase(signup.pending, (state, action) => {
+                state.status = "loading";
+                state.error = null;
             })
             .addCase(signup.fulfilled, (state, action) => {
                 state.status = "succeeded";
-                localStorage.setItem("profile", JSON.stringify({ ...action?.payload }));
+                localStorage.setItem("profile", JSON.stringify({ ...action?.payload?.data }));
 
-                state.user.id= action.payload.user._id,
-                state.user.firstName= action.payload.user.first_name,
-                state.user.lastName= action.payload.user.last_name,
-                state.user.email= action.payload.user.email,
-                state.user.globalPermission= action.payload.user.global_permission,
-                state.user.isVerified= action.payload.user.is_verified,
-                state.user.lastActiveRest= action.payload.user.last_active_rest
+                state.user = {
+                    id: action.payload.data.user.id,
+                    firstName: action.payload.data.user.first_name,
+                    lastName: action.payload.data.user.last_name,
+                    email: action.payload.data.user.email,
+                    globalPermission: action.payload.data.user.global_permission,
+                    isVerified: action.payload.data.user.is_verified,
+                };
             })
-           .addCase(relogin.fulfilled, (state, action) => {
-              state.status = "succeeded";
+            .addCase(signup.rejected, (state, action) => {
+                console.log("rejected");
+                console.log(action);
+                state.status = "failed";
+                state.user = null;
+                state.error = action.payload.data.error;
+            })
+            .addCase(relogin.fulfilled, (state, action) => {
+                state.status = "succeeded";
                 localStorage.setItem("profile", JSON.stringify({ ...action.payload.data }));
 
-                state.user.id= action.payload.data.user._id,
-                state.user.firstName= action.payload.data.user.first_name,
-                state.user.lastName= action.payload.data.user.last_name,
-                state.user.email= action.payload.data.user.email,
-                state.user.globalPermission= action.payload.data.user.global_permission,
-                state.user.isVerified= action.payload.data.user.is_verified
-                state.user.lastActiveRest= action.payload.data.user.last_active_rest
-            }).addCase(setACtiveRest.fulfilled, (state, action) => {
+                (state.user.id = action.payload.data.user._id),
+                    (state.user.firstName = action.payload.data.user.first_name),
+                    (state.user.lastName = action.payload.data.user.last_name),
+                    (state.user.email = action.payload.data.user.email),
+                    (state.user.globalPermission = action.payload.data.user.global_permission),
+                    (state.user.isVerified = action.payload.data.user.is_verified);
+                state.user.lastActiveRest = action.payload.data.user.last_active_rest;
+            })
+            .addCase(setACtiveRest.fulfilled, (state, action) => {
                 if (action.payload.error) {
-                    state.user.lastActiveRest=null;
+                    state.user.lastActiveRest = null;
                 } else {
                     state.status = "succeeded";
                     state.lastActiveRest = "alma";
                 }
-            })
+            });
     },
 });
 
 export const selectCurrentUser = (state) => state.auth.user;
 export const getStatus = (state) => state.status;
-export const { logout, loginWithToken } = authSlice.actions;
+export const { logout, loginWithToken, clearError } = authSlice.actions;
 export default authSlice.reducer;

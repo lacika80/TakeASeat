@@ -17,16 +17,18 @@ dotenv.config();
 export const signin = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await UserModel.findOne({ email }).populate("last_active_rest");
+        const user = await UserModel.findOne({ email }).lean().populate("last_active_rest");
 
-        if (!user) return res.status(404).json({ error: "Felhasználó nem létezik" });
+        if (!user) return res.status(401).json({ error: "Hibás bejelentkezési adatok!" });
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-        if (!isPasswordCorrect) return res.status(400).json({ error: "Érvénytelen azonosítási adatok" });
+        if (!isPasswordCorrect) return res.status(401).json({ error: "Hibás bejelentkezési adatok!" });
 
         const token = jwt.sign({ email: user.email, id: user._id }, process.env.SECRET, { expiresIn: "24h" });
-        delete user.email; //idk why can't delete this...
+        user.id = user._id;
+        delete user._id;
+        delete user.password;
         res.status(200).json({ user, token });
     } catch (err) {
         res.status(500).json({ error: "Valami félrement" });
@@ -39,32 +41,34 @@ export const relogin = async (req, res) => {
 };
 //registration
 export const signup = async (req, res) => {
-    const { email, password, first_name, last_name, invite_token } = req.body;
+    const { email, password, confirmPassword, first_name, last_name, invite_token } = req.body;
     try {
         if (!invite_token) {
             const oldUser = await UserModel.findOne({ email });
 
             if (oldUser) return res.status(400).json({ error: "Felhasználó már létezik ezzel az email címmel" });
         }
-
+        if (password != confirmPassword) return res.status(400).json({ error: "A 2 jelszó nem azonos" });
         const hashedPassword = await bcrypt.hash(password, 12);
         let result;
         if (!invite_token) {
             result = await UserModel.create({ email, password: hashedPassword, first_name, last_name });
-            await createEmail(result, process.env.DYNAMIC_LINK_VERIFY_EMAIL);
+           
+            //await createEmail(result, process.env.DYNAMIC_LINK_VERIFY_EMAIL);
         } else {
             const link = getDyniamicLink(invite_token);
             if (!tokenIsValid(link)) return res.status(400).json({ error: "Token nem érvényes" });
-            result = await UserModel.create({ email, password: hashedPassword, first_name, last_name, is_verified: true, global_permission: link.global_permission });
+            result = await UserModel.create({ email, password: hashedPassword, first_name, last_name, is_verified: true, global_permission: (link.global_permission ??= 1) });
         }
-
+        result = result.toObject();
         const token = jwt.sign({ email: result.email, id: result._id }, process.env.SECRET, { expiresIn: "24h" });
+        result.id = result._id;
+        delete result._id;
         delete result.password;
         //gives back the user without password for the fluent login
         res.status(201).json({ user: result, token });
     } catch (error) {
         res.status(500).json({ error: "Valami félrement" });
-
         console.log(error);
     }
 };

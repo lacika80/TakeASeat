@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: process.env.REACT_APP_SERVER_URL, timeout: 1000 });
+const API = axios.create({ baseURL: process.env.REACT_APP_SERVER_URL, timeout: 5000 });
 API.interceptors.request.use((req) => {
     if (localStorage.getItem("profile")) {
         req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem("profile")).token}`;
@@ -14,7 +14,8 @@ API.interceptors.request.use((req) => {
 //------------------
 export const signIn = (formData) =>
     API.post("/user/signin", formData).catch(function (error) {
-        return { error: error.response.data.error };
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 export const relogin = () =>
     API.post("/user/relogin").catch(function (error) {
@@ -22,12 +23,13 @@ export const relogin = () =>
     });
 export const signUp = (formData) =>
     API.post("/user/signup", formData).catch(function (error) {
-        return { error: error.response.data.error };
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 export const forgottenPW = (formData) =>
     API.post("/user/forgottenpw", formData).catch(function (error) {
-        console.log("catch-ben");
-        new Error({ error: error.response.data.error });
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 export const verify = (data) =>
     API.post("/verify", data).catch(function (error) {
@@ -59,7 +61,8 @@ export const modifyGPerm = (data) =>
 //------------------
 export const getMyRestaurants = () =>
     API.get("restaurant").catch(function (error) {
-        return { error: error.response.data.error };
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 export const createRestaurant = (data) =>
     API.post("restaurant", data).catch(function (error) {

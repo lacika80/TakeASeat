@@ -28,10 +28,13 @@ const initialState = {
         tableOpts: ["kint", "bent", "ablaknál", "dohányzó", "nem dohányzó"],
     }, */
 };
-export const getMyRestaurants = createAsyncThunk("restaurant", async () => {
-    const response = await api.getMyRestaurants();
-    console.log(response);
-    return { data: response.data, status: response.status, error: response?.error };
+export const getMyRestaurants = createAsyncThunk("restaurant", async (_, { rejectWithValue }) => {
+    try {
+        const response = await api.getMyRestaurants();
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 export const createRestaurant = createAsyncThunk("restaurant/create", async (formData) => {
     const response = await api.createRestaurant(formData);
@@ -51,39 +54,32 @@ const restaurantsSlice = createSlice({
     extraReducers(builder) {
         builder
             .addCase(getMyRestaurants.fulfilled, (state, action) => {
-                if (action.payload.error) {
-                    state.status = "failed";
-                    state.message = action.payload.error;
-                    delete state.list;
-                } else {
-                    state.list = action.payload.data;
-                    state.status = "succeeded";
-                    delete state.message;
-                }
+                state.list = action.payload.data;
+                state.status = "succeeded";
             })
             .addCase(getMyRestaurants.pending, (state, action) => {
                 state.status = "loading";
+                delete state.error;
             })
             .addCase(getMyRestaurants.rejected, (state, action) => {
-                state.status = "failed";
-                state.message = action.error.message;
                 delete state.list;
+                state.status = "failed";
+                state.error = action.data.error;
             })
             .addCase(getActive.pending, (state, action) => {
                 state.status = "loading";
-                state.message = null;
+                state.error = null;
                 state.active = null;
             })
             .addCase(getActive.fulfilled, (state, action) => {
                 if (action?.payload?.error) {
                     state.status = "failed";
-                    state.message = action.payload.error;
+                    state.error = action.payload.error;
                 } else {
                     state.status = "succeeded";
                     state.active = action.payload.data.restaurant;
                 }
-                
-            })
+            });
     },
 });
 
