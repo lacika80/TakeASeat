@@ -62,9 +62,10 @@ const restaurantsSlice = createSlice({
                 delete state.error;
             })
             .addCase(getMyRestaurants.rejected, (state, action) => {
+                console.log(action);
                 delete state.list;
                 state.status = "failed";
-                state.error = action.data.error;
+                state.error = action.payload.data.error;
             })
             .addCase(getActive.pending, (state, action) => {
                 state.status = "loading";
@@ -72,13 +73,8 @@ const restaurantsSlice = createSlice({
                 state.active = null;
             })
             .addCase(getActive.fulfilled, (state, action) => {
-                if (action?.payload?.error) {
-                    state.status = "failed";
-                    state.error = action.payload.error;
-                } else {
-                    state.status = "succeeded";
-                    state.active = action.payload.data.restaurant;
-                }
+                state.status = "succeeded";
+                state.active = action.payload.data.restaurant;
             });
     },
 });

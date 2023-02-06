@@ -31,7 +31,7 @@ export default function App() {
         if (auth.user && !socket) setSocket(io("http://localhost:5000", { auth: { token: auth.token } }));
         if (!auth.user && socket) setSocket(null);
     }, [auth]);
-//setup the listeners - cleaner not needed because this page is always active
+    //setup the listeners - cleaner not needed because this page is always active
     useEffect(() => {
         if (!socket) return;
         socket.on("connect", () => {
@@ -54,9 +54,9 @@ export default function App() {
                 <Route path="/" element={<NoUserGate />}>
                     {/* public routes */}
                     <Route path="Auth" element={<Auth />} />
-                    <Route path="verify" element={<Verify />} />
                     <Route path="newpassword" element={<NewPassword />} />
                 </Route>
+                <Route path="verify" element={<Verify />} />
                 {/* we want to protect these routes */}
                 <Route element={<RequireAuth />}>
                     <Route element={<Navbar />}>

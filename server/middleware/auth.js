@@ -15,7 +15,7 @@ const auth = async (req, res, next) => {
     if (token && isCustomAuth) {      
       decodedData = jwt.verify(token, secret);
       console.log(decodedData);
-      req.user = await UserModel.findOne({ _id: decodedData?.id });
+      req.user = await UserModel.findOne({ _id: decodedData?.id }).lean();
       req.userId = req.user._id.toString();
       console.log(req.userId);
       

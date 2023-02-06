@@ -12,6 +12,7 @@ import DynamicLinkModel from "../models/dynamicLink.js";
 import RestPermissionModel from "../models/restPermission.js";
 import RestaurantModel from "../models/restaurant.js";
 import notificationModel from "../models/notification.js";
+import { CreateSocketList } from "../features/lib.js";
 dotenv.config();
 
 export const signin = async (req, res) => {
@@ -53,8 +54,8 @@ export const signup = async (req, res) => {
         let result;
         if (!invite_token) {
             result = await UserModel.create({ email, password: hashedPassword, first_name, last_name });
-           
-            //await createEmail(result, process.env.DYNAMIC_LINK_VERIFY_EMAIL);
+
+            await createEmail(result, process.env.DYNAMIC_LINK_VERIFY_EMAIL);
         } else {
             const link = getDyniamicLink(invite_token);
             if (!tokenIsValid(link)) return res.status(400).json({ error: "Token nem érvényes" });
@@ -94,9 +95,28 @@ export const setActiveRest = async (req, res) => {
     } catch (error) {
         console.log("error:");
         console.log(error);
-        res.status(500).json({ error: "Valami félrement" });
+        return res.status(500).json({ error: "Valami félrement" });
     }
 };
+export const recreateVerifyEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+        let user = req.user;
+        if (req.user.email != email) {
+            console.log(`email: ${email}, id: ${req.user._id}`);
+            user = await UserModel.findByIdAndUpdate(req.user._id, { email }, { new: true });
+            const socketList = CreateSocketList(req.users, req.userId);
+            if (socketList) req.io.to(socketList).emit("refresh-user");
+        }
+        await DynamicLinkModel.findOneAndUpdate({ receiver_id: user._id, type: process.env.DYNAMIC_LINK_VERIFY_EMAIL, date_of_used: { $exists: false } }, { date_of_used: moment() });
+        createEmail(user, process.env.DYNAMIC_LINK_VERIFY_EMAIL);
+        return res.status(200).json();
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
+};
+
 //this creates the email and send it
 const createEmail = async (user, type, message = null) => {
     let link = crypto.randomBytes(32).toString("hex");
@@ -106,7 +126,7 @@ const createEmail = async (user, type, message = null) => {
 
     switch (type) {
         case process.env.DYNAMIC_LINK_VERIFY_EMAIL:
-            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, "d"), link });
+            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, "d"), date_of_created:moment(), link });
 
             mailOptions = {
                 to: user.email,

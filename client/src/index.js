@@ -32,7 +32,6 @@ const darkTheme = createTheme({
     </React.StrictMode> */
 }
 root.render(
-    <React.StrictMode>
         <Provider store={store}>
             <ThemeProvider theme={darkTheme}>
                 <LocalizationProvider dateAdapter={AdapterMoment}>
@@ -42,6 +41,5 @@ root.render(
                 </LocalizationProvider>
             </ThemeProvider>
         </Provider>
-    </React.StrictMode>
 );
 //reportWebVitals(console.log);

@@ -48,12 +48,28 @@ export const signup = createAsyncThunk("auth/signup", async (formData, { rejectW
     }
 });
 
+export const recreateVerifyEmail = createAsyncThunk("auth/recreateVerifyEmail", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.recreateVerifyEmail(formData);
+        console.log("response");
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
+
 export const forgottenPW = createAsyncThunk("auth/forgottenpw", async (formData) => {
     const response = await api.forgottenPW(formData);
     return response.data;
 });
+
 export const relogin = createAsyncThunk("auth/relogin", async () => {
     const response = await api.relogin();
+    return response;
+});
+
+export const verifyEmailCreated = createAsyncThunk("auth/verifyEmailCreated", async () => {
+    const response = await api.verifyEmailCreated();
     return response;
 });
 
@@ -94,7 +110,7 @@ export const authSlice = createSlice({
             .addCase(signin.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 console.log(action);
-                 localStorage.setItem("profile", JSON.stringify({ ...action?.payload?.data }));
+                 localStorage.setItem("profile", JSON.stringify({ ...action.payload.data }));
                 state.user = {
                     id: action.payload.data.user.id,
                     firstName: action.payload.data.user.first_name,

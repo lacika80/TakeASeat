@@ -33,7 +33,18 @@ export const forgottenPW = (formData) =>
     });
 export const verify = (data) =>
     API.post("/verify", data).catch(function (error) {
-        return { error: error.response.data.error };
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });
+export const verifyEmailCreated = () =>
+    API.get(`/verify/emailCreated`).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });
+export const recreateVerifyEmail = (formData) =>
+    API.post("/user/recreateverifyemail", formData).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 
 //------------------

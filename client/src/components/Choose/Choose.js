@@ -1,4 +1,5 @@
-import { Alert, Button, Input, Paper, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Input, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField } from "@mui/material";
+import { Box, Stack } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -7,10 +8,9 @@ import { createRestaurant, getMyRestaurants } from "../../features/restaurantsSl
 const Choose = ({ socket }) => {
     const user = useSelector((state) => state.auth.user);
     const rests = useSelector((state) => state.restaurants);
-    //hides the creating field
-    const [creating, setCreating] = useState(false);
-    const [newRestName, setNewRestName] = useState("");
     const dispatch = useDispatch();
+    const [open, setOpen] = useState(false);
+    const [form, setForm] = useState({ name: null });
 
     //on page load get the restaurants and config the socket functions
     useEffect(() => {
@@ -25,75 +25,77 @@ const Choose = ({ socket }) => {
             };
         }
     }, []);
-
-    const creatingSwitch = () => {
-        setCreating(!creating);
+    const handleChange = (e) => {
+        if (e.target.name != "seats" || e.target.value >= 0) {
+            setForm({ ...form, [e.target.name]: e.target.value });
+        }
     };
-    //dispach for create new restaurant
-    const createRest = (e) => {
-        e.preventDefault();
-        dispatch(createRestaurant({ name: newRestName }));
-    };
-    //WIP - check on every change that is there a restaurant with this name
-    const nameChangeHandler = (e) => {
-        console.log(e.target.value);
-        setNewRestName(e.target.value);
+    const handleSubmit = () => {
+        setOpen(!open);
+        dispatch(createRestaurant(form));
     };
 
     return (
         <Paper elevation={3} sx={{ p: 2, minHeight: "20vh" }}>
-            {!user.isVerified && <Alert severity="error">This is an error alert — check it out!</Alert>}
-            {rests.list && (
-                <Table stickyHeader sx={{ pb: 3 }}>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>id</TableCell>
-                            <TableCell>név</TableCell>
-                            <TableCell>létrehozva</TableCell>
-                            <TableCell></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rests.list.map((rest) => (
-                            <TableRow hover key={rest._id}>
-                                <TableCell>{rest._id}</TableCell>
-                                <TableCell>{rest.name}</TableCell>
-                                <TableCell>{rest.creation_date.slice(0, 10)}</TableCell>
-                                <TableCell>
-                                    <Button component={Link} to={"rest/" + rest._id}>
-                                        Kiválaszt
-                                    </Button>
-                                </TableCell>
+            <Stack spacing={2}>
+                {rests.error && <Alert severity="error">{rests.error}</Alert>}
+                {rests.list && (
+                    <Table stickyHeader sx={{ pb: 3 }}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>id</TableCell>
+                                <TableCell>név</TableCell>
+                                <TableCell>létrehozva</TableCell>
+                                <TableCell></TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )}
-            {creating && (
-                <form onSubmit={createRest}>
-                    <Input name="name" id="name" type="text" placeholder="Étterem neve" onChange={nameChangeHandler} required></Input>
-                    {/*  if the user is not allowed to create restaurant then the button will disabled */}
-                    {user.globalPermission & process.env.REACT_APP_G_CREATE_RESTAURANT && user.isVerified ? (
-                        <Button type="submit" variant="contained">
-                            Létrehozás
-                        </Button>
-                    ) : (
-                        <Button type="submit" variant="contained" disabled>
-                            Létrehozás
-                        </Button>
-                    )}
-                </form>
-            )}
-            {/*  if the user is not allowed to create restaurant then the button will disabled */}
-            {user.globalPermission & process.env.REACT_APP_G_CREATE_RESTAURANT && user.isVerified ? (
-                <Button onClick={creatingSwitch} variant="contained">
-                    Új étterem létrehozása
-                </Button>
-            ) : (
-                <Button variant="contained" disabled>
-                    Új étterem létrehozása
-                </Button>
-            )}
+                        </TableHead>
+                        <TableBody>
+                            {rests.list.map((rest) => (
+                                <TableRow hover key={rest._id}>
+                                    <TableCell>{rest._id}</TableCell>
+                                    <TableCell>{rest.name}</TableCell>
+                                    <TableCell>{rest.creation_date.slice(0, 10)}</TableCell>
+                                    <TableCell>
+                                        <Button component={Link} to={"rest/" + rest._id}>
+                                            Kiválaszt
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
+                <Box>
+                    <Button onClick={() => setOpen(!open)} variant="contained">
+                        Új étterem létrehozása
+                    </Button>
+                </Box>
+            </Stack>
+            <Dialog open={open} onClose={() => setOpen(!open)}>
+                <DialogTitle>Étterem létrehozása</DialogTitle>
+                {user.globalPermission & process.env.REACT_APP_G_CREATE_RESTAURANT && user.isVerified ? (
+                    <>
+                        <DialogContent sx={{ minWidth: "15rem" }}>
+                            <TextField autoFocus margin="dense" id="name" name="name" label="Étterem neve" type="text" fullWidth variant="standard" onChange={handleChange} value={form.name} />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpen(!open)}>Mégsem</Button>
+                            <Button onClick={handleSubmit}>Elfogad</Button>
+                        </DialogActions>
+                    </>
+                ) : (
+                    <DialogContentText sx={{ p: 3 }}>
+                        {user.isVerified ? (
+                            <DialogContentText>
+                                Önnek nincs jogosultsága új étterem létrehozásához. <br />
+                                További információhoz írjon a: {process.env.REACT_APP_SUPPORT_EMAIL} email címre.
+                            </DialogContentText>
+                        ) : (
+                            <DialogContentText>Étterem létrehozásához kérem érvényesítse e-mail címét!</DialogContentText>
+                        )}
+                    </DialogContentText>
+                )}
+            </Dialog>
         </Paper>
     );
 };
