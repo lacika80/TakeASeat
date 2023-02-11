@@ -25,7 +25,7 @@ const drawerWidth = 400;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(({ theme, open }) => ({
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(2),
     transition: theme.transitions.create("margin", {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
@@ -94,7 +94,6 @@ function Restaurant() {
     useEffect(() => {
         dispatch(getActive(restId));
         if (auth.lastActiveRest != restId) dispatch(setACtiveRest(restId));
-            
     }, []);
 
     return (
@@ -103,11 +102,6 @@ function Restaurant() {
             <Box sx={{ display: "flex" }}>
                 <Main open={addRes}>
                     <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
-                        {rest.status == "failed" && (
-                            <Container sx={{ p: 2 }}>
-                                <Alert severity="error">{rest.message}</Alert>
-                            </Container>
-                        )}
                         {/* parent grid */}
 
                         <Grid container spacing={1} sx={{ py: 1 }} direction="row" justifyContent="center" alignItems="center">

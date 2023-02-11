@@ -77,13 +77,17 @@ export const getMyRestaurants = () =>
     });
 export const createRestaurant = (data) =>
     API.post("restaurant", data).catch(function (error) {
-        return { error: error.response.data.error };
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 export const getActiveRest = (data) =>
     API.get(`/restaurant/${data}`, {
         params: {
             restId: data,
         },
+    }).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
     });
 export const updateRestaurant = (data) =>
     API.patch("restaurant", data).catch(function (error) {

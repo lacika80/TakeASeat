@@ -36,15 +36,24 @@ export const getMyRestaurants = createAsyncThunk("restaurant", async (_, { rejec
         return rejectWithValue(err);
     }
 });
-export const createRestaurant = createAsyncThunk("restaurant/create", async (formData) => {
-    const response = await api.createRestaurant(formData);
-    console.log(response);
-    return { data: response.data, status: response.status, error: response?.error };
+export const createRestaurant = createAsyncThunk("restaurant/create", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.createRestaurant(formData);
+        console.log(response);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 
-export const getActive = createAsyncThunk("restaurant/getActive", async (restId) => {
-    const response = await api.getActiveRest(restId);
-    return response;
+export const getActive = createAsyncThunk("restaurant/getActive", async (restId, { rejectWithValue }) => {
+    try {
+        const response = await api.getActiveRest(restId);
+        console.log(response);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 
 const restaurantsSlice = createSlice({
@@ -75,6 +84,21 @@ const restaurantsSlice = createSlice({
             .addCase(getActive.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 state.active = action.payload.data.restaurant;
+            })
+            .addCase(getActive.rejected, (state, action) => {
+                state.status = "failed";
+                state.error = action.payload.data.error;
+            })
+            .addCase(createRestaurant.pending, (state, action) => {
+                state.status = "loading";
+                state.error = null;
+            })
+            .addCase(createRestaurant.fulfilled, (state, action) => {
+                state.status = "succeeded";
+            })
+            .addCase(createRestaurant.rejected, (state, action) => {
+                state.status = "failed";
+                state.error = action.payload.data.error;
             });
     },
 });

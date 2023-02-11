@@ -8,24 +8,36 @@ import SpaceModel from "../models/space.js";
 import GlobalModel from "../models/global.js";
 
 export const createRestaurant = async (req, res) => {
+    const { name } = req.body;
     if (!(req.user.global_permission & process.env.G_CREATE_RESTAURANT)) {
         req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-user");
         return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
     }
     try {
-        const space = await SpaceModel.create({});
-        const restaurant = await restaurantModel.create({ name: req.body.name, owner: req.userId, spaces: [space._id] });
-        const restperm = await RestPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
-        let permissions = restaurant.permissions;
+        const user = await userModel
+            .findById(req.user._id)
+            .populate({ path: "restaurants", select: ["name", "owner"] })
+            .lean();
+        const rests = [];
+        user.restaurants.forEach((item) => {
+            if (item.owner == user._id.toString()) rests.push(item.name);
+        });
+        if (rests.includes(name)) {
+            return res.status(400).json({ error: `Ilyen nevű éttermed már van (${name})` });
+        }
+        //const space = await SpaceModel.create({});
+        const restaurant = await restaurantModel.create({ name: name, owner: req.userId, users: [{ user: req.user._id, permission: process.env.R_OWNER }] /* , spaces: [space._id] */ });
+        //const restperm = await RestPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
+        /* let permissions = restaurant.permissions;
         permissions.push(restperm._id);
         await restaurantModel.findByIdAndUpdate(restaurant._id, { permissions });
         const restaurants = Array.isArray(req.user.restaurants) ? req.user.restaurants : [];
         restaurants.push(restaurant._id);
         permissions = Array.isArray(req.user.permissions) ? req.user.permissions : [];
-        permissions.push(restperm._id);
-        await userModel.findByIdAndUpdate(req.userId, { permissions, restaurants });
-        req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-rests");
-        return res.status(201);
+        permissions.push(restperm._id); */
+        await userModel.findByIdAndUpdate(req.userId, { $push: { restaurants: restaurant._id } });
+        //req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-rests");
+        return res.status(201).json({ id: restaurant._id.toString() });
     } catch (error) {
         console.log("error:");
         console.log(error);
@@ -34,28 +46,33 @@ export const createRestaurant = async (req, res) => {
 };
 export const deleteRestaurant = async (req, res) => {};
 export const getRestaurants = async (req, res) => {
-    const user = await userModel.findById(req.userId).populate("restaurants");
+    const user = await userModel
+        .findById(req.userId, "restaurants")
+        .populate({ path: "restaurants", select: ["name", "owner", "createdAt"], populate: { path: "owner", select: ["first_name", "last_name"] } });
     return res.status(200).json(user.restaurants);
 };
 export const getRestaurant = async (req, res) => {
-    let id;
     try {
-        id = new mongoose.Types.ObjectId(req.params.id);
-    } catch (error) {
-        return res.status(404).json({ error: "Hibás étterem id" });
-    }
-    if (req.user.restaurants.includes(id)) {
-        const restaurant = (await restaurantModel.findById(req.params.id).populate("spaces")).toObject();
-        delete restaurant.permissions;
-        delete restaurant.users;
-        const restPermission = await RestPermissionModel.findOne({ user_id: req.userId, restaurant_id: req.params.id });
-        restaurant.permission = restPermission.permission.toNumber();
-        return res.status(200).json({ restaurant });
-    } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
-    /*  console.log(await userModel.findById("63a8f801a3488f68f073fcb5").populate("restaurants"));
+        const { id } = req.params;
+        const { user, userId } = req;
+        let rest;
+        if (!(rest = await restaurantModel.findById(id))) return res.status(404).json({ error: "Hibás étterem id" });
+        user.restaurants.map((item, index) => {
+            user.restaurants[index] = item.toString();
+        });
+        if (user.restaurants.includes(id)) {
+            const restaurant = await restaurantModel.findById(id).lean();
+            return res.status(200).json({ restaurant });
+        } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        /*  console.log(await userModel.findById("63a8f801a3488f68f073fcb5").populate("restaurants"));
     const test = new mongoose.Types.ObjectId("63a8f801a3488f68f073fcb5");
     req.user.restaurants[0] = req.user.restaurants[0].toString();
     console.log(test); */
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
 };
 
 /*

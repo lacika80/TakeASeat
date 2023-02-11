@@ -37,6 +37,7 @@ export default function Navbar() {
     const location = useLocation();
     const navigate = useNavigate();
     const [verifEmailCreated, setVerifEmailCreated] = useState(null);
+    const rests = useSelector((state) => state.restaurants);
 
     useEffect(() => {
         if (user && !user.isVerified) {
@@ -148,6 +149,7 @@ export default function Navbar() {
                     </Toolbar>
                 </AppBar>
                 {verifEmailCreated && <VerifyAlert verifEmailCreated={verifEmailCreated} checkMail={checkMail} />}
+                {rests.error && <Alert severity="error">{rests.error}</Alert>}
                 <Outlet />
             </Stack>
         </Box>

@@ -57,6 +57,7 @@ const restaurantSchema = mongoose.Schema(
                 user: {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "User",
+                    required: true,
                 },
                 permission: { type: Number, required: true },
                 global: {
@@ -69,12 +70,6 @@ const restaurantSchema = mongoose.Schema(
             },
         ],
         is_active: { type: Boolean, default: 1, alias: "isActive" },
-        permissions: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "RestPermission",
-            },
-        ],
         ooh: [
             {
                 day_of_week: { type: Number, required: true, min: 1, max: 7 },
@@ -111,6 +106,8 @@ const restaurantSchema = mongoose.Schema(
                 },
             },
         },
+        toJSON: { virtuals: true }, // So `res.json()` and other `JSON.stringify()` functions include virtuals
+        toObject: { virtuals: true }, // So `console.log()` and other functions that use `toObject()` include virtuals
     }
 );
 
