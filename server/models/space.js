@@ -1,8 +1,15 @@
 import mongoose from "mongoose";
 
 const spaceSchema = mongoose.Schema({
-    name: { type: String, default: "default" },
-    tables: [{ type: mongoose.Schema.Types.ObjectId, ref: "Table" }],
+    name: String,
+    tables: [
+        {
+            name: { type: String, required: true },
+            posx: { type: Number, required: true },
+            posy: { type: Number, required: true },
+            tableOpts: [String],
+        },
+    ],
 });
 
 export default mongoose.model("Space", spaceSchema);

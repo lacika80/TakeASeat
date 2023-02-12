@@ -12,11 +12,11 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm }) =
         <>
             {addRes ? (
                 <Button
-                    variant={addResForm.tableId == table.id ? "contained" : "outlined"}
+                    variant={addResForm.tableId == table._id ? "contained" : "outlined"}
                     sx={{ width: "10rem" }}
                     onClick={() => {
                         {
-                            setAddResForm({ ...addResForm, tableId: table.id });
+                            setAddResForm({ ...addResForm, tableId: table._id });
                             console.log(addResForm);
                         }
                     }}

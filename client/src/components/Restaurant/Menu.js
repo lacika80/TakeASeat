@@ -1,8 +1,10 @@
 import { Container, Divider, Button } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import React, { useEffect } from "react";
+import {  useSelector } from "react-redux";
 
 const Menu = ({ editingTableList, setEditingTableList, setAddRes, permission }) => {
+    const rest = useSelector((state) => state.restaurants);
     return (
         <Container maxWidth="xl">
             <Grid container direction="row" justifyContent="flex-start" alignItems="center" spacing={1} my={0.5}>
@@ -35,6 +37,15 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, permission }) 
                         <Grid>
                             {editingTableList ? (
                                 <Button disabled>Asztallista Szerkesztése</Button>
+                            ) : rest.active && rest.status == "succeeded" && rest.active.spaces[0].tables.length==0 ? (
+                                <Button  color="success"
+                                    onClick={() => {
+                                        setEditingTableList(true);
+                                        setAddRes(false);
+                                    }}
+                                >
+                                    Asztallista Szerkesztése
+                                </Button>
                             ) : (
                                 <Button
                                     onClick={() => {

@@ -68,8 +68,8 @@ export default function App() {
                         <Route path="userlist" element={<RequireGPerm allowedRoles={[process.env.REACT_APP_G_LIST_USERS]} />}>
                             <Route index element={<UserList socket={socket} />} />
                         </Route>
-                        <Route path="/rest/:restId" element={<Restaurant />} />
-                        <Route path="/rest/:restId/users" element={<RestUserList />} />
+                        <Route path="/rest/:restId" element={<Restaurant socket={socket} />} />
+                        <Route path="/rest/:restId/users" element={<RestUserList socket={socket} />} />
                     </Route>
                 </Route>
             </Route>

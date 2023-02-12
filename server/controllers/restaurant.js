@@ -25,8 +25,13 @@ export const createRestaurant = async (req, res) => {
         if (rests.includes(name)) {
             return res.status(400).json({ error: `Ilyen nevű éttermed már van (${name})` });
         }
-        //const space = await SpaceModel.create({});
-        const restaurant = await restaurantModel.create({ name: name, owner: req.userId, users: [{ user: req.user._id, permission: process.env.R_OWNER }], spaces:[{name:"Default"}] /* , spaces: [space._id] */ });
+        const space = await SpaceModel.create({});
+        const restaurant = await restaurantModel.create({
+            name: name,
+            owner: req.userId,
+            users: [{ user: req.user._id, permission: process.env.R_OWNER }],
+            spaces: [space._id],
+        });
         //const restperm = await RestPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
         /* let permissions = restaurant.permissions;
         permissions.push(restperm._id);
@@ -61,11 +66,10 @@ export const getRestaurant = async (req, res) => {
             user.restaurants[index] = item.toString();
         });
         if (user.restaurants.includes(id)) {
-            const restaurant = await restaurantModel.findById(id).lean();
-            restaurant.users.map((item)=>{
-              
-                if (user._id.toString() == item.user.toString()) restaurant.permission=item.permission;
-            })
+            const restaurant = await restaurantModel.findById(id).populate("spaces").lean();
+            restaurant.users.map((item) => {
+                if (user._id.toString() == item.user.toString()) restaurant.permission = item.permission;
+            });
             return res.status(200).json({ restaurant });
         } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
         /*  console.log(await userModel.findById("63a8f801a3488f68f073fcb5").populate("restaurants"));
@@ -178,7 +182,34 @@ implementation guide in hungary:
 
  */
 export const createTable = async (req, res) => {
-    return res.status(501).json({ error: "Nincs elkészítve" });
+    try {
+        const { name, seats, posx, spaceId, restId } = req.body;
+        //get the restaurant and the requester's permission
+        const rest = await restaurantModel.findById(restId);
+        const restUser = rest.users.filter((user) => user.user.toString() == req.userId)[0];
+        if (!(restUser.permission & process.env.R_CREATE_TABLE)) return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
+        const space = await SpaceModel.findById(spaceId).lean();
+        const posy = space.tables.length > 0 ? Math.max(...space.tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1 : 0;
+        //const posy = Math.max(...(await SpaceModel.findById(spaceId).lean()).tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1;
+        const table = { name, posx, posy };
+        const updated = await SpaceModel.findByIdAndUpdate(
+            spaceId,
+            {
+                $push: {
+                    tables: { name, posx, posy },
+                },
+            },
+            { new: true }
+        );
+        console.log("updated");
+        console.log(updated);
+        req.io.emit(`refresh-rest-${restId}`);
+        return res.status(201).json({});
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
 };
 
 /*

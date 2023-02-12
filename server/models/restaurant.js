@@ -24,25 +24,9 @@ const restaurantSchema = mongoose.Schema(
     {
         spaces: [
             {
-                name: String,
-                tables: [
-                    {
-                        _id: { type: mongoose.ObjectId, default: new mongoose.Types.ObjectId() },
-                        name: { type: String, required: true },
-                        posx: { type: Number, required: true },
-                        posy: { type: Number, required: true },
-                        tableOpts: [String],
-                    },
-                    {
-                        virtuals: {
-                            space: {
-                                get() {
-                                    return "find out how to get the space which this table inside";
-                                },
-                            },
-                        },
-                    },
-                ],
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Space",
+                required: true,
             },
         ],
         name: { type: String, required: true },

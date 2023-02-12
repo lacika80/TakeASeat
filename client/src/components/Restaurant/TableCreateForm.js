@@ -1,12 +1,15 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createTable } from "../../features/restaurantsSlice";
+
 
 const TableCreateForm = (props) => {
-    const { open, setOpen, edit, table } = props.props;
-
-    const initialState = edit ? { name: table.name ? table.name : "", seats: table.seats ? table.seats : 0 } : { name: "", seats: 0 };
-
+    const initialState= { name: "", seats: 0, spaceId: 0, restId: 0, posx: 0, posy: 0 };
+    const { open, setOpen, edit, table, spaceId } = props.props;
+    const rest = useSelector((state) => state.restaurants);
     const [form, setForm] = useState(initialState);
+    const dispatch = useDispatch();
 
     const handleChange = (e) => {
         if (e.target.name != "seats" || e.target.value >= 0) {
@@ -18,12 +21,24 @@ const TableCreateForm = (props) => {
 
         setTimeout(() => {
             setForm(initialState);
-        }, 1000);
+        }, 500);
     };
-    const handleSubmit = () => {
-        
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         setOpen(!open);
+        console.log(form);
+        dispatch(createTable(form));
     };
+    useEffect(() => {
+        if (open)
+            if (edit) {
+                setForm({ name: table.name ?? "", seats: table.seats ?? 0, spaceId: table.spaceId, restId: rest.active._id });
+            } else {
+                setForm({ name: "", seats: 0, posx: table.posx, spaceId: table.spaceId, restId: rest.active._id });
+            }
+    }, [open]);
+
     return (
         <Dialog open={open} onClose={() => setOpen(!open)}>
             <DialogTitle>{edit ? "Asztal szerkesztése" : "Asztal létrehozása"}</DialogTitle>

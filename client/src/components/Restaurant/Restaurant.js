@@ -62,7 +62,7 @@ const fabStyle = {
 } */
 const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableId: "" };
 
-function Restaurant() {
+function Restaurant({ socket }) {
     const auth = useSelector((state) => state.auth);
     const user = auth.user;
     const rest = useSelector((state) => state.restaurants);
@@ -70,21 +70,21 @@ function Restaurant() {
     const [addRes, setAddRes] = useState(false);
     const [editingTableList, setEditingTableList] = useState(false);
     const [addTable, setAddTable] = useState(false);
-    const [addTablePosX, setAddTablePosX] = useState(0);
+    const [addTableForm, setAddTableForm] = useState({ posx: null, spaceId: null });
     const dispatch = useDispatch();
     const { restId } = useParams();
     /**
      * creates the buttons for add table
      * @param {Number} posx which column you would like to add the table
      */
-    const tableAddButton = (posx) => {
+    const tableAddButton = (posx, spaceId) => {
         return (
             <Grid item>
                 <Button
                     variant="outlined"
                     sx={{ width: "10rem" }}
                     onClick={() => {
-                        setAddTablePosX(posx + 1);
+                        setAddTableForm({ posx: posx, spaceId });
                         setAddTable(true);
                     }}
                 >
@@ -94,8 +94,19 @@ function Restaurant() {
         );
     };
     useEffect(() => {
-        dispatch(getActive(restId));
-        console.log(user);
+        dispatch(getActive(restId))
+            .then(unwrapResult)
+            .then((obj) => {});
+        if (socket) {
+            socket.on(`refresh-rest-${restId}`, () => {
+                console.log("frissités");
+                dispatch(getActive(restId));
+            });
+            return () => {
+                //when leave the page cleaning the listener
+                socket.off(`refresh-rest-${restId}`);
+            };
+        }
     }, []);
     useEffect(() => {
         if (rest.active && user.lastActiveRest?._id != rest.active._id && rest.status != "loading")
@@ -116,36 +127,39 @@ function Restaurant() {
                             {/* Button's grid */}
                             <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} />
                             {/* Tables' grid */}
-                            {rest.active?.spaces[0]?.tables &&
-                                rest.active.spaces[0].tables.map((space) => (
-                                    <Grid container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
-                                        {space.tables.map((tableColumn, index) => (
-                                            <Grid container item spacing={2} direction="column" key={index} justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                                {tableColumn.map((table) => (
-                                                    <Grid item key={table.id}>
-                                                        <Table table={table} editingTableList={editingTableList} addRes={addRes} addResForm={addResForm} setAddResForm={setAddResForm} />
+                            {rest.active?.spaces &&
+                                rest.active.spaces.map(
+                                    (space) =>
+                                        space.tables && (
+                                            <Grid key={space._id} container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                                                {space.tables.map((tableColumn, index) => (
+                                                    <Grid key={`column${index}`} container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                                        {tableColumn.map((table,index2) => (
+                                                            <Grid item key={`table${index}${index2}`}>
+                                                                <Table table={table} editingTableList={editingTableList} addRes={addRes} addResForm={addResForm} setAddResForm={setAddResForm} />
+                                                            </Grid>
+                                                        ))}
+                                                        {editingTableList && tableAddButton(index, space._id)}
                                                     </Grid>
                                                 ))}
-                                                {editingTableList && tableAddButton(index)}
+                                                {/* -------------------------EZT CHECKOLNI --------------------------------------- */}
+                                                {space.tables.length == 0 && rest.active.permission & process.env.REACT_APP_R_CREATE_TABLE && (
+                                                    <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                                        {editingTableList && tableAddButton(0, space._id)}
+                                                    </Grid>
+                                                )}
+                                                {editingTableList && space.tables.length < 4 && (
+                                                    <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
+                                                        {tableAddButton(space.tables.length, space._id)}
+                                                    </Grid>
+                                                )}
                                             </Grid>
-                                        ))}
-                                        {/* -------------------------EZT CHECKOLNI --------------------------------------- */}
-                                        {space.tables.length == 0 && rest.active.permission & process.env.REACT_APP_R_CREATE_TABLE && (
-                                            <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                                {editingTableList && tableAddButton(0)}
-                                            </Grid>
-                                        )}
-                                        {editingTableList && space.length < 4 && (
-                                            <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                                {tableAddButton(space.length)}
-                                            </Grid>
-                                        )}
-                                    </Grid>
-                                ))}
+                                        )
+                                )}
                             {rest.active?.spaces[0]?.tables && rest.active.spaces[0].tables.length == 0 && editingTableList && (
                                 <Grid container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
                                     <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                        {editingTableList && tableAddButton(0)}
+                                        {editingTableList && tableAddButton(0, rest.active.spaces[0]._id)}
                                     </Grid>
                                 </Grid>
                             )}
@@ -172,7 +186,7 @@ function Restaurant() {
                     tableOpts={rest.active ? (rest.active.tableOpts ? rest.active.tableOpts : []) : []}
                 />
             </Box>
-            <TableCreateForm props={{ open: addTable, setOpen: setAddTable, edit: false, table: { posx: addTablePosX } }} />
+            <TableCreateForm props={{ open: addTable, setOpen: setAddTable, edit: false, table: addTableForm }} />
         </>
     );
 }
