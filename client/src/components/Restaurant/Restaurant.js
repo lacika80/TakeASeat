@@ -98,6 +98,7 @@ function Restaurant({ socket }) {
             .then(unwrapResult)
             .then((obj) => {});
         if (socket) {
+            console.log("subscribed");
             socket.on(`refresh-rest-${restId}`, () => {
                 console.log("frissités");
                 dispatch(getActive(restId));
@@ -107,7 +108,7 @@ function Restaurant({ socket }) {
                 socket.off(`refresh-rest-${restId}`);
             };
         }
-    }, []);
+    }, [socket]);
     useEffect(() => {
         if (rest.active && user.lastActiveRest?._id != rest.active._id && rest.status != "loading")
             dispatch(setACtiveRest(restId))
@@ -133,8 +134,20 @@ function Restaurant({ socket }) {
                                         space.tables && (
                                             <Grid key={space._id} container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
                                                 {space.tables.map((tableColumn, index) => (
-                                                    <Grid key={`column${index}`} container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                                        {tableColumn.map((table,index2) => (
+                                                    <Grid
+                                                        key={`column${index}`}
+                                                        container
+                                                        item
+                                                        spacing={2}
+                                                        direction="column"
+                                                        justifyContent="flex-start"
+                                                        alignItems="center"
+                                                        lg={3}
+                                                        md={4}
+                                                        sm={6}
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {tableColumn.map((table, index2) => (
                                                             <Grid item key={`table${index}${index2}`}>
                                                                 <Table table={table} editingTableList={editingTableList} addRes={addRes} addResForm={addResForm} setAddResForm={setAddResForm} />
                                                             </Grid>
@@ -143,12 +156,8 @@ function Restaurant({ socket }) {
                                                     </Grid>
                                                 ))}
                                                 {/* -------------------------EZT CHECKOLNI --------------------------------------- */}
-                                                {space.tables.length == 0 && rest.active.permission & process.env.REACT_APP_R_CREATE_TABLE && (
-                                                    <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                                        {editingTableList && tableAddButton(0, space._id)}
-                                                    </Grid>
-                                                )}
-                                                {editingTableList && space.tables.length < 4 && (
+                                               
+                                                {editingTableList && space.tables.length < 4  && (
                                                     <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
                                                         {tableAddButton(space.tables.length, space._id)}
                                                     </Grid>
@@ -156,13 +165,6 @@ function Restaurant({ socket }) {
                                             </Grid>
                                         )
                                 )}
-                            {rest.active?.spaces[0]?.tables && rest.active.spaces[0].tables.length == 0 && editingTableList && (
-                                <Grid container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
-                                    <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
-                                        {editingTableList && tableAddButton(0, rest.active.spaces[0]._id)}
-                                    </Grid>
-                                </Grid>
-                            )}
                         </Grid>
 
                         {editingTableList ? (

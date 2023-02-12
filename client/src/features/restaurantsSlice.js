@@ -63,6 +63,23 @@ export const createTable = createAsyncThunk("restaurant/createtable", async (for
         return rejectWithValue(err);
     }
 });
+export const editTable = createAsyncThunk("restaurant/editTable", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.editTable(formData);
+        console.log(response);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
+export const deleteTable = createAsyncThunk("restaurant/deleteTable", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.deleteTable(formData);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
 
 const restaurantsSlice = createSlice({
     name: "restaurants",
@@ -98,6 +115,9 @@ const restaurantsSlice = createSlice({
                 action.payload.data.restaurant.spaces.map((space, index) => {
                     space.tables.sort((a, b) => a.posy - b.posy);
                     space.tables.sort((a, b) => a.posx - b.posx);
+                    console.log(action);
+                    action.payload.data.restaurant.spaces[index].deletedTables = action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === false);
+                    action.payload.data.restaurant.spaces[index].tables = action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === true);
                     const t2 = [];
                     let last = { posx: false };
                     space.tables.forEach((element) => {
@@ -131,7 +151,7 @@ const restaurantsSlice = createSlice({
                 state.error = action.payload.data.error;
             })
             .addCase(createTable.pending, (state, action) => {
-                state.status = "loading";
+                //state.status = "loading";
                 state.error = null;
             })
             .addCase(createTable.fulfilled, (state, action) => {

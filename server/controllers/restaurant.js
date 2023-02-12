@@ -6,6 +6,7 @@ import userModel from "../models/user.js";
 import RestPermissionModel from "../models/restPermission.js";
 import SpaceModel from "../models/space.js";
 import GlobalModel from "../models/global.js";
+import TableModel from "../models/table.js";
 
 export const createRestaurant = async (req, res) => {
     const { name } = req.body;
@@ -32,16 +33,8 @@ export const createRestaurant = async (req, res) => {
             users: [{ user: req.user._id, permission: process.env.R_OWNER }],
             spaces: [space._id],
         });
-        //const restperm = await RestPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
-        /* let permissions = restaurant.permissions;
-        permissions.push(restperm._id);
-        await restaurantModel.findByIdAndUpdate(restaurant._id, { permissions });
-        const restaurants = Array.isArray(req.user.restaurants) ? req.user.restaurants : [];
-        restaurants.push(restaurant._id);
-        permissions = Array.isArray(req.user.permissions) ? req.user.permissions : [];
-        permissions.push(restperm._id); */
         await userModel.findByIdAndUpdate(req.userId, { $push: { restaurants: restaurant._id } });
-        //req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-rests");
+        req.io.to(Object.keys(req.users).find((key) => req.users[key] === req.userId)).emit("refresh-rests");
         return res.status(201).json({ id: restaurant._id.toString() });
     } catch (error) {
         console.log("error:");
@@ -66,16 +59,18 @@ export const getRestaurant = async (req, res) => {
             user.restaurants[index] = item.toString();
         });
         if (user.restaurants.includes(id)) {
-            const restaurant = await restaurantModel.findById(id).populate("spaces").lean();
+            const restaurant = (
+                await restaurantModel.findById(id).populate({
+                    path: "spaces",
+                    // Get friends of friends - populate the 'friends' array for every friend
+                    populate: { path: "tables" },
+                })
+            ).toObject();
             restaurant.users.map((item) => {
                 if (user._id.toString() == item.user.toString()) restaurant.permission = item.permission;
             });
             return res.status(200).json({ restaurant });
         } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
-        /*  console.log(await userModel.findById("63a8f801a3488f68f073fcb5").populate("restaurants"));
-    const test = new mongoose.Types.ObjectId("63a8f801a3488f68f073fcb5");
-    req.user.restaurants[0] = req.user.restaurants[0].toString();
-    console.log(test); */
     } catch (error) {
         console.log("error:");
         console.log(error);
@@ -188,15 +183,16 @@ export const createTable = async (req, res) => {
         const rest = await restaurantModel.findById(restId);
         const restUser = rest.users.filter((user) => user.user.toString() == req.userId)[0];
         if (!(restUser.permission & process.env.R_CREATE_TABLE)) return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
-        const space = await SpaceModel.findById(spaceId).lean();
+        const space = await SpaceModel.findById(spaceId).populate("tables").lean();
+        space.tables = space.tables.filter((table) => table.is_active === true);
         const posy = space.tables.length > 0 ? Math.max(...space.tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1 : 0;
         //const posy = Math.max(...(await SpaceModel.findById(spaceId).lean()).tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1;
-        const table = { name, posx, posy };
+        const table = await TableModel.create({ name, posx, posy });
         const updated = await SpaceModel.findByIdAndUpdate(
             spaceId,
             {
                 $push: {
-                    tables: { name, posx, posy },
+                    tables: table._id,
                 },
             },
             { new: true }
@@ -217,13 +213,33 @@ implementation guide in hungary:
 
  */
 export const editTable = async (req, res) => {
-    return res.status(501).json({ error: "Nincs elkészítve" });
+    const { name, seats, tableId, restId } = req.body;
+    try {
+        await TableModel.findByIdAndUpdate(tableId, { name, seats });
+        req.io.emit(`refresh-rest-${restId}`);
+        return res.status(202).json({});
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
+    
 };
 
 /*
-implementation guide in hungary:
+need permission check!!!!!
 
  */
 export const deleteTable = async (req, res) => {
-    return res.status(501).json({ error: "Nincs elkészítve" });
+    try {
+        const { tableId } = req.query;
+        const restId = req.params.id;
+        await TableModel.findByIdAndUpdate(tableId, { is_active: false });
+        req.io.emit(`refresh-rest-${restId}`);
+        return res.status(200).json({});
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
 };

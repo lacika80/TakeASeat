@@ -103,3 +103,17 @@ export const createTable = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
+    export const editTable = (data) =>
+    API.patch(`restaurant/${data.restId}/table`, data).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });
+export const deleteTable = (data) =>
+    API.delete(`restaurant/${data.restId}/table`, {
+        params: {
+            tableId: data.tableId,
+        },
+    }).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });

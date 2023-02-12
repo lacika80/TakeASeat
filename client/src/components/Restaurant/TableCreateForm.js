@@ -1,11 +1,10 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createTable } from "../../features/restaurantsSlice";
-
+import { createTable, editTable } from "../../features/restaurantsSlice";
 
 const TableCreateForm = (props) => {
-    const initialState= { name: "", seats: 0, spaceId: 0, restId: 0, posx: 0, posy: 0 };
+    const initialState = { name: "", seats: 0, spaceId: 0, restId: 0, posx: 0, posy: 0 };
     const { open, setOpen, edit, table, spaceId } = props.props;
     const rest = useSelector((state) => state.restaurants);
     const [form, setForm] = useState(initialState);
@@ -28,12 +27,13 @@ const TableCreateForm = (props) => {
         e.preventDefault();
         setOpen(!open);
         console.log(form);
-        dispatch(createTable(form));
+        if (edit) dispatch(editTable(form));
+        else dispatch(createTable(form));
     };
     useEffect(() => {
         if (open)
             if (edit) {
-                setForm({ name: table.name ?? "", seats: table.seats ?? 0, spaceId: table.spaceId, restId: rest.active._id });
+                setForm({ name: table.name ?? "", seats: table.seats ?? 0, spaceId: table.spaceId, restId: rest.active._id, tableId:table._id });
             } else {
                 setForm({ name: "", seats: 0, posx: table.posx, spaceId: table.spaceId, restId: rest.active._id });
             }

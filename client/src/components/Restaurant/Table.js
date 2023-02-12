@@ -3,10 +3,20 @@ import React, { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TableCreateForm from "./TableCreateForm";
+import { useDispatch } from "react-redux";
+import {deleteTable as deltable} from '../../features/restaurantsSlice'
+import { useParams } from "react-router-dom";
 
 const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm }) => {
     const [openEdit, setOpenEdit] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const dispatch = useDispatch();
+    const { restId } = useParams();
+
+    const deleteTable = () => {
+        setDeleting(false);
+        dispatch(deltable({ tableId: table._id, restId }));
+    };
 
     return (
         <>
@@ -65,7 +75,7 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm }) =
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDeleting(false)}>Mégsem</Button>
-                    <Button onClick={() => setDeleting(false)}>Elfogad</Button>
+                    <Button onClick={deleteTable}>Elfogad</Button>
                 </DialogActions>
             </Dialog>
             <TableCreateForm props={{ open: openEdit, setOpen: setOpenEdit, edit: true, table }} />
