@@ -44,7 +44,7 @@ const Choose = ({ socket }) => {
     return (
         <Paper elevation={3} sx={{ p: 2, minHeight: "20vh" }}>
             <Stack spacing={2}>
-               {/*  {rests.error && <Alert severity="error">{rests.error}</Alert>} */}
+                {/*  {rests.error && <Alert severity="error">{rests.error}</Alert>} */}
                 {rests.list && (
                     <Table stickyHeader sx={{ pb: 3 }}>
                         <TableHead>
@@ -101,17 +101,13 @@ const Choose = ({ socket }) => {
                             {form.name ? <Button onClick={handleSubmit}>Elfogad</Button> : <Button disabled>Elfogad</Button>}
                         </DialogActions>
                     </>
-                ) : (
+                ) : user.isVerified ? (
                     <DialogContentText sx={{ p: 3 }}>
-                        {user.isVerified ? (
-                            <DialogContentText>
-                                Önnek nincs jogosultsága új étterem létrehozásához. <br />
-                                További információhoz írjon a: {process.env.REACT_APP_SUPPORT_EMAIL} email címre.
-                            </DialogContentText>
-                        ) : (
-                            <DialogContentText>Étterem létrehozásához kérem érvényesítse e-mail címét!</DialogContentText>
-                        )}
+                        Önnek nincs jogosultsága új étterem létrehozásához. <br />
+                        További információhoz írjon a: {process.env.REACT_APP_SUPPORT_EMAIL} email címre.
                     </DialogContentText>
+                ) : (
+                    <DialogContentText sx={{ p: 3 }}>Étterem létrehozásához kérem érvényesítse e-mail címét!</DialogContentText>
                 )}
             </Dialog>
         </Paper>

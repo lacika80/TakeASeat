@@ -24,7 +24,6 @@ const restaurantSchema = mongoose.Schema(
     {
         spaces: [
             {
-                _id: { type: mongoose.ObjectId, default: new mongoose.Types.ObjectId() },
                 name: String,
                 tables: [
                     {

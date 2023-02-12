@@ -21,15 +21,15 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../features/authSlice";
+import { logout, verifyEmailCreated } from "../../features/authSlice";
 import { useAuth } from "../../hooks/useAuth";
 import MenuIcon from "@mui/icons-material/Menu";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Container } from "@mui/system";
-import { verifyEmailCreated, recreateVerifyEmail } from "../../features/authSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import moment from "moment";
 import VerifyAlert from "./VerifyAlert";
+import { clearErr } from "../../features/restaurantsSlice";
 
 export default function Navbar() {
     const user = useSelector((state) => state.auth.user);
@@ -63,6 +63,7 @@ export default function Navbar() {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -149,7 +150,16 @@ export default function Navbar() {
                     </Toolbar>
                 </AppBar>
                 {verifEmailCreated && <VerifyAlert verifEmailCreated={verifEmailCreated} checkMail={checkMail} />}
-                {rests.error && <Alert severity="error">{rests.error}</Alert>}
+                {rests.error && (
+                    <Alert
+                        severity="error"
+                        onClose={() => {
+                            dispatch(clearErr());
+                        }}
+                    >
+                        {rests.error}
+                    </Alert>
+                )}
                 <Outlet />
             </Stack>
         </Box>

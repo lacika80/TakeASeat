@@ -39,7 +39,6 @@ export const getMyRestaurants = createAsyncThunk("restaurant", async (_, { rejec
 export const createRestaurant = createAsyncThunk("restaurant/create", async (formData, { rejectWithValue }) => {
     try {
         const response = await api.createRestaurant(formData);
-        console.log(response);
         return response;
     } catch (err) {
         return rejectWithValue(err);
@@ -49,6 +48,15 @@ export const createRestaurant = createAsyncThunk("restaurant/create", async (for
 export const getActive = createAsyncThunk("restaurant/getActive", async (restId, { rejectWithValue }) => {
     try {
         const response = await api.getActiveRest(restId);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
+
+export const createTable = createAsyncThunk("restaurant/createtable", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.createTable(formData);
         console.log(response);
         return response;
     } catch (err) {
@@ -59,7 +67,12 @@ export const getActive = createAsyncThunk("restaurant/getActive", async (restId,
 const restaurantsSlice = createSlice({
     name: "restaurants",
     initialState,
-    reducers: {},
+    reducers: {
+        clearErr: (state) => {
+            state.status = null;
+            delete state.error;
+        },
+    },
     extraReducers(builder) {
         builder
             .addCase(getMyRestaurants.fulfilled, (state, action) => {
@@ -71,7 +84,6 @@ const restaurantsSlice = createSlice({
                 delete state.error;
             })
             .addCase(getMyRestaurants.rejected, (state, action) => {
-                console.log(action);
                 delete state.list;
                 state.status = "failed";
                 state.error = action.payload.data.error;
@@ -79,13 +91,14 @@ const restaurantsSlice = createSlice({
             .addCase(getActive.pending, (state, action) => {
                 state.status = "loading";
                 state.error = null;
-                state.active = null;
             })
             .addCase(getActive.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 state.active = action.payload.data.restaurant;
+                //state.active.permission=0;
             })
             .addCase(getActive.rejected, (state, action) => {
+                state.active = null;
                 state.status = "failed";
                 state.error = action.payload.data.error;
             })
@@ -99,8 +112,20 @@ const restaurantsSlice = createSlice({
             .addCase(createRestaurant.rejected, (state, action) => {
                 state.status = "failed";
                 state.error = action.payload.data.error;
+            })
+            .addCase(createTable.pending, (state, action) => {
+                state.status = "loading";
+                state.error = null;
+            })
+            .addCase(createTable.fulfilled, (state, action) => {
+                state.status = "succeeded";
+            })
+            .addCase(createTable.rejected, (state, action) => {
+                state.status = "failed";
+                state.error = action.payload.data.error;
             });
     },
 });
 
 export default restaurantsSlice.reducer;
+export const { clearErr } = restaurantsSlice.actions;

@@ -2,33 +2,27 @@ import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema(
     {
-        first_name: { type: String, required: true },
-        last_name: { type: String, required: true },
+        first_name: { type: String, required: true, alias:"firstName" },
+        last_name: { type: String, required: true, alias:"lastName" },
         email: { type: String, required: true, set: (v) => v.toLowerCase() },
         password: { type: String, required: true },
-        is_verified: { type: Boolean, default: 0 },
-        google_identifier: { type: String },
+        is_verified: { type: Boolean, default: 0, alias:"isVerified" },
+        google_identifier: { type: String, alias:"googleIdentifier" },
         registration_date: {
             type: Date,
             default: new Date(),
         },
-        global_permission: { type: Number, default: 1 },
+        global_permission: { type: Number, default: 1 , alias:"globalPermission"},
         restaurants: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Restaurant",
             },
         ],
-        permissions: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "RestPermission",
-            },
-        ],
         last_active_rest: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Restaurant",
-            get: (v) => v.toString(),
+            alias:"lastActiveRest"
         },
         notifications: [
             {

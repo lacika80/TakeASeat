@@ -18,7 +18,7 @@ dotenv.config();
 export const signin = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await UserModel.findOne({ email }).lean().populate("last_active_rest");
+        const user = (await UserModel.findOne({ email }).populate({ path: "last_active_rest", select: ["name"] })).toObject();
 
         if (!user) return res.status(401).json({ error: "Hibás bejelentkezési adatok!" });
 
@@ -31,14 +31,24 @@ export const signin = async (req, res) => {
         delete user._id;
         delete user.password;
         res.status(200).json({ user, token });
-    } catch (err) {
-        res.status(500).json({ error: "Valami félrement" });
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
     }
 };
 //alias user check
 export const relogin = async (req, res) => {
-    const token = jwt.sign({ email: req.user.email, id: req.user._id }, process.env.SECRET, { expiresIn: "24h" });
-    res.status(200).json({ user: req.user, token });
+    try {
+        const user = (await UserModel.findById(req.userId).populate({ path: "last_active_rest", select: ["name"] })).toObject();
+        delete user.password;
+        const token = jwt.sign({ email: user.email, id: user._id }, process.env.SECRET, { expiresIn: "24h" });
+        res.status(200).json({ user, token });
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
 };
 //registration
 export const signup = async (req, res) => {
@@ -89,9 +99,10 @@ export const forgottenpw = async (req, res) => {
 };
 
 export const setActiveRest = async (req, res) => {
+    const { restId } = req.params;
     try {
-        await UserModel.findByIdAndUpdate(req.userId, { last_active_rest: req.params.resId });
-        return res.status(201);
+        const user = await UserModel.findByIdAndUpdate(req.userId, { last_active_rest: restId }, { new: true });
+        return res.status(201).json({});
     } catch (error) {
         console.log("error:");
         console.log(error);
@@ -126,7 +137,7 @@ const createEmail = async (user, type, message = null) => {
 
     switch (type) {
         case process.env.DYNAMIC_LINK_VERIFY_EMAIL:
-            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, "d"), date_of_created:moment(), link });
+            result = await DynamicLinkModel.create({ type, receiver_id: user._id, email: user.email, date_valid_until: moment().add(1, "d"), date_of_created: moment(), link });
 
             mailOptions = {
                 to: user.email,

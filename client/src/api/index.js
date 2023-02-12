@@ -97,3 +97,9 @@ export const setActiveRest = (restId) =>
     API.patch(`user/setActiveRest/${restId}`).catch(function (error) {
         return { error: error.response.data.error };
     });
+
+export const createTable = (data) =>
+    API.post(`restaurant/${data.restId}/table`, data).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });

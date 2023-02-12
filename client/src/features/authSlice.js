@@ -10,21 +10,12 @@ const initialState = () => {
             const decodedToken = jwtDecode(ls.token);
             if (decodedToken.exp * 1000 > new Date().getTime()) {
                 return {
-                    user: {
-                        id: ls.user.id,
-                        firstName: ls.user.first_name,
-                        lastName: ls.user.last_name,
-                        email: ls.user.email,
-                        globalPermission: ls.user.global_permission,
-                        isVerified: ls.user.is_verified,
-                        lastActiveRest: ls.user.last_active_rest??null,
-                    },
+                    user: ls.user,
                     token: ls.token,
                 };
             }
         }
     } catch (error) {
-        console.log("drop");
         localStorage.removeItem("profile");
     }
     return { user: null, token: null, error: null };
@@ -59,8 +50,13 @@ export const recreateVerifyEmail = createAsyncThunk("auth/recreateVerifyEmail", 
 });
 
 export const forgottenPW = createAsyncThunk("auth/forgottenpw", async (formData) => {
-    const response = await api.forgottenPW(formData);
-    return response.data;
+    try {
+        const response = await api.forgottenPW(formData);
+        console.log("response");
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 
 export const relogin = createAsyncThunk("auth/relogin", async () => {
@@ -74,8 +70,12 @@ export const verifyEmailCreated = createAsyncThunk("auth/verifyEmailCreated", as
 });
 
 export const setACtiveRest = createAsyncThunk("auth/setActiveRest", async (restId) => {
-    const response = await api.setActiveRest(restId);
-    return response;
+    try {
+        const response = await api.setActiveRest(restId);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
 });
 export const authSlice = createSlice({
     name: "auth",
@@ -83,14 +83,7 @@ export const authSlice = createSlice({
     reducers: {
         loginWithToken(state) {
             const ls = JSON.parse(localStorage.getItem("profile"));
-
-            state.user.id = ls.user._id;
-            state.user.firstName = ls.user.first_name;
-            state.user.lastName = ls.user.last_name;
-            state.user.name = ls.user.name;
-            state.user.email = ls.user.email;
-            state.user.isVerified = ls.user.is_verified;
-            state.user.lastActiveRest = ls.user.last_active_rest;
+            state.user = ls.user;
             state.token = ls.token;
         },
         logout: () => {
@@ -109,17 +102,17 @@ export const authSlice = createSlice({
             })
             .addCase(signin.fulfilled, (state, action) => {
                 state.status = "succeeded";
-                console.log(action);
-                 localStorage.setItem("profile", JSON.stringify({ ...action.payload.data }));
-                state.user = {
+                localStorage.setItem("profile", JSON.stringify({ ...action.payload.data }));
+                state.user = action.payload.data.user;
+                /* state.user = {
                     id: action.payload.data.user.id,
                     firstName: action.payload.data.user.first_name,
                     lastName: action.payload.data.user.last_name,
                     email: action.payload.data.user.email,
                     globalPermission: action.payload.data.user.global_permission,
                     isVerified: action.payload.data.user.is_verified,
-                    lastActiveRest: action.payload.data.user.last_active_rest??null,
-                };
+                    lastActiveRest: action.payload.data.user.last_active_rest ?? null,
+                }; */
                 state.token = action.payload.data.token;
             })
             .addCase(signin.rejected, (state, action) => {
@@ -134,19 +127,9 @@ export const authSlice = createSlice({
             .addCase(signup.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 localStorage.setItem("profile", JSON.stringify({ ...action?.payload?.data }));
-
-                state.user = {
-                    id: action.payload.data.user.id,
-                    firstName: action.payload.data.user.first_name,
-                    lastName: action.payload.data.user.last_name,
-                    email: action.payload.data.user.email,
-                    globalPermission: action.payload.data.user.global_permission,
-                    isVerified: action.payload.data.user.is_verified,
-                };
+                state.user = action.payload.data.user;
             })
             .addCase(signup.rejected, (state, action) => {
-                console.log("rejected");
-                console.log(action);
                 state.status = "failed";
                 state.user = null;
                 state.error = action.payload.data.error;
@@ -154,23 +137,8 @@ export const authSlice = createSlice({
             .addCase(relogin.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 localStorage.setItem("profile", JSON.stringify({ ...action.payload.data }));
-
-                (state.user.id = action.payload.data.user._id),
-                    (state.user.firstName = action.payload.data.user.first_name),
-                    (state.user.lastName = action.payload.data.user.last_name),
-                    (state.user.email = action.payload.data.user.email),
-                    (state.user.globalPermission = action.payload.data.user.global_permission),
-                    (state.user.isVerified = action.payload.data.user.is_verified);
-                state.user.lastActiveRest = action.payload.data.user.last_active_rest;
+                state.user = action.payload.data.user;
             })
-            .addCase(setACtiveRest.fulfilled, (state, action) => {
-                if (action.payload.error) {
-                    state.user.lastActiveRest = null;
-                } else {
-                    state.status = "succeeded";
-                    state.lastActiveRest = "alma";
-                }
-            });
     },
 });
 

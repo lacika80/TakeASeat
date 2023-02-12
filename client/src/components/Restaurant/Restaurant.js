@@ -19,7 +19,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { CheckRPerm } from "../../features/CheckRPerm";
 
 import { getActive } from "../../features/restaurantsSlice";
-import { setACtiveRest } from "../../features/authSlice";
+import { setACtiveRest, relogin } from "../../features/authSlice";
+import Menu from "./Menu";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const drawerWidth = 400;
 
@@ -66,7 +68,7 @@ function Restaurant() {
     const rest = useSelector((state) => state.restaurants);
     const [addResForm, setAddResForm] = useState(addResInitialState);
     const [addRes, setAddRes] = useState(false);
-    const [editingTableList, setEditingTableList] = useState(true);
+    const [editingTableList, setEditingTableList] = useState(false);
     const [addTable, setAddTable] = useState(false);
     const [addTablePosX, setAddTablePosX] = useState(0);
     const dispatch = useDispatch();
@@ -93,8 +95,14 @@ function Restaurant() {
     };
     useEffect(() => {
         dispatch(getActive(restId));
-        if (auth.lastActiveRest != restId) dispatch(setACtiveRest(restId));
+        console.log(user);
     }, []);
+    useEffect(() => {
+        if (rest.active && user.lastActiveRest?._id != rest.active._id && rest.status != "loading")
+            dispatch(setACtiveRest(restId))
+                .then(unwrapResult)
+                .then(() => dispatch(relogin()));
+    }, [rest.active]);
 
     return (
         <>
@@ -106,38 +114,7 @@ function Restaurant() {
 
                         <Grid container spacing={1} sx={{ py: 1 }} direction="row" justifyContent="center" alignItems="center">
                             {/* Button's grid */}
-                            <Grid container maxWidth="md" justifyContent="space-around" alignItems="center">
-                                <Grid item sx={{ p: 1 }}>
-                                    {editingTableList ? (
-                                        <Button disabled>Asztallista Szerkesztése</Button>
-                                    ) : (
-                                        <Button
-                                            onClick={() => {
-                                                setEditingTableList(true);
-                                                setAddRes(false);
-                                            }}
-                                        >
-                                            Asztallista Szerkesztése
-                                        </Button>
-                                    )}
-                                </Grid>
-                                <Grid item sx={{ p: 1 }}>
-                                    {editingTableList ? (
-                                        <Button
-                                            onClick={() => {
-                                                setEditingTableList(false);
-                                            }}
-                                        >
-                                            Kész
-                                        </Button>
-                                    ) : (
-                                        <></>
-                                    )}
-                                </Grid>
-                            </Grid>
-                            <Container>
-                                <Divider />
-                            </Container>
+                            <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} />
                             {/* Tables' grid */}
                             {rest.active?.spaces[0]?.tables &&
                                 rest.active.spaces[0].tables.map((space) => (

@@ -26,7 +26,7 @@ export const createRestaurant = async (req, res) => {
             return res.status(400).json({ error: `Ilyen nevű éttermed már van (${name})` });
         }
         //const space = await SpaceModel.create({});
-        const restaurant = await restaurantModel.create({ name: name, owner: req.userId, users: [{ user: req.user._id, permission: process.env.R_OWNER }] /* , spaces: [space._id] */ });
+        const restaurant = await restaurantModel.create({ name: name, owner: req.userId, users: [{ user: req.user._id, permission: process.env.R_OWNER }], spaces:[{name:"Default"}] /* , spaces: [space._id] */ });
         //const restperm = await RestPermissionModel.create({ restaurant_id: restaurant._id, user_id: req.userId, permission: process.env.R_OWNER });
         /* let permissions = restaurant.permissions;
         permissions.push(restperm._id);
@@ -62,6 +62,10 @@ export const getRestaurant = async (req, res) => {
         });
         if (user.restaurants.includes(id)) {
             const restaurant = await restaurantModel.findById(id).lean();
+            restaurant.users.map((item)=>{
+              
+                if (user._id.toString() == item.user.toString()) restaurant.permission=item.permission;
+            })
             return res.status(200).json({ restaurant });
         } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
         /*  console.log(await userModel.findById("63a8f801a3488f68f073fcb5").populate("restaurants"));

@@ -33,10 +33,14 @@ const Auth = () => {
         e.preventDefault();
         switch (mode) {
             case "login":
-                dispatch(signin({ email: form.email, password: form.password }));
+                dispatch(signin({ email: form.email, password: form.password }))
+                    .then(unwrapResult)
+                    .then((obj) => {
+                        if (obj?.data?.user?.lastActiveRest?.name) navigate(`/rest/${obj.data.user.lastActiveRest._id}`);
+                    });
                 break;
             case "reg":
-                dispatch(signup(form))/* 
+                dispatch(signup(form)); /* 
                     .then(unwrapResult)
                     .then((obj) => console.log({ obj }))
                     .catch((obj) => console.log({ objErr: obj })); */
