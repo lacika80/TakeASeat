@@ -185,7 +185,7 @@ function Restaurant({ socket }) {
                     drawerWidth={drawerWidth}
                     addResForm={addResForm}
                     setAddResForm={setAddResForm}
-                    tableOpts={rest.active ? (rest.active.tableOpts ? rest.active.tableOpts : []) : []}
+                    tableOpts={rest?.active?.tableOpts}
                 />
             </Box>
             <TableCreateForm props={{ open: addTable, setOpen: setAddTable, edit: false, table: addTableForm }} />

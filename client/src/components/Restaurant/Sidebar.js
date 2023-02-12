@@ -8,8 +8,16 @@ import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import moment, { now } from "moment";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { useSelector } from "react-redux";
 
-export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, addResForm, setAddResForm, tableOpts }) {
+export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, addResForm, setAddResForm }) {
+    const rest = useSelector((state) => state.restaurants);
+    const [tableOpts, setTableOpts] = useState([])
+    useEffect(() => {
+        if (addRes) setTableOpts(...rest.active.tableOpts);
+        console.log(tableOpts);
+    }, [addRes]);
+
     const handleChange = (e) => {
         if (!((e.target.name == "adult" || e.target.name == "child") && e.target.value < 0)) {
             setAddResForm({ ...addResForm, [e.target.name]: e.target.value });
@@ -103,16 +111,18 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
                         renderInput={(params) => <TextField {...params} />}
                     />
                 </Grid>
-                <Grid>
-                    <Autocomplete
-                        multiple
-                        id="tags-standard"
-                        options={tableOpts}
-                        disableCloseOnSelect
-                        getOptionLabel={(option) => option}
-                        renderInput={(params) => <TextField {...params} variant="standard" label="Hely igények" />}
-                    />
-                </Grid>
+                {addRes && tableOpts.length  > 0 &&(
+                    <Grid>
+                        <Autocomplete
+                            multiple
+                            id="tags-standard"
+                            options={tableOpts}
+                            disableCloseOnSelect
+                            getOptionLabel={(option) => option}
+                            renderInput={(params) => <TextField {...params} variant="standard" label="Hely igények" />}
+                        />
+                    </Grid>
+                )}
                 <Grid>
                     <Typography color="#8a8a8a" variant="caption">
                         Konkrét asztal kiválasztásához nyomj rá az asztalra az asztaltérképen
