@@ -178,7 +178,8 @@ implementation guide in hungary:
  */
 export const createTable = async (req, res) => {
     try {
-        const { name, seats, posx, spaceId, restId } = req.body;
+        const { tableName, seats, posx, spaceId, restId } = req.body;
+        let tableOpts = [...(new Set(req.body.tableOpts))];
         //get the restaurant and the requester's permission
         const rest = await restaurantModel.findById(restId);
         const restUser = rest.users.filter((user) => user.user.toString() == req.userId)[0];
@@ -187,7 +188,7 @@ export const createTable = async (req, res) => {
         space.tables = space.tables.filter((table) => table.is_active === true);
         const posy = space.tables.length > 0 ? Math.max(...space.tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1 : 0;
         //const posy = Math.max(...(await SpaceModel.findById(spaceId).lean()).tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1;
-        const table = await TableModel.create({ name, posx, posy });
+        const table = await TableModel.create({ name:tableName, posx, posy, seats, tableOpts });
         const updated = await SpaceModel.findByIdAndUpdate(
             spaceId,
             {
@@ -213,9 +214,10 @@ implementation guide in hungary:
 
  */
 export const editTable = async (req, res) => {
-    const { name, seats, tableId, restId } = req.body;
+    const { tableName, seats, tableId, restId } = req.body;
+    let tableOpts = [...(new Set(req.body.tableOpts))];
     try {
-        await TableModel.findByIdAndUpdate(tableId, { name, seats });
+        await TableModel.findByIdAndUpdate(tableId, { name:tableName, seats, tableOpts });
         req.io.emit(`refresh-rest-${restId}`);
         return res.status(202).json({});
     } catch (error) {
@@ -223,7 +225,6 @@ export const editTable = async (req, res) => {
         console.log(error);
         return res.status(500).json({ error: "Valami félrement" });
     }
-    
 };
 
 /*

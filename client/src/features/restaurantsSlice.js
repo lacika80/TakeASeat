@@ -112,17 +112,19 @@ const restaurantsSlice = createSlice({
             .addCase(getActive.fulfilled, (state, action) => {
                 state.status = "succeeded";
                 //table sorting and grouping for grid visualization
-                action.payload.data.restaurant.tableOpts = new Set();
+                let tableOptsSet = new Set();
                 action.payload.data.restaurant.spaces.map((space, index) => {
                     space.tables.sort((a, b) => a.posy - b.posy);
                     space.tables.sort((a, b) => a.posx - b.posx);
                     action.payload.data.restaurant.spaces[index].deletedTables = action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === false);
                     action.payload.data.restaurant.spaces[index].tables = action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === true);
                     //adding to global tableOpts
-                    action.payload.data.restaurant.tableOpts.add(...space.tables.map((table) => table.tableOpts));
                     const t2 = [];
                     let last = { posx: false };
                     space.tables.forEach((element) => {
+                        element.tableOpts.forEach((opt)=>{
+                            tableOptsSet.add(opt);
+                        })
                         if (last.posx === false || last.posx != element.posx) {
                             t2.push([element]);
                         } else {
@@ -132,6 +134,7 @@ const restaurantsSlice = createSlice({
                     });
                     action.payload.data.restaurant.spaces[index].tables = t2;
                 });
+                action.payload.data.restaurant.tableOpts=[...tableOptsSet];
                 state.active = action.payload.data.restaurant;
                 //state.active.permission=0;
             })

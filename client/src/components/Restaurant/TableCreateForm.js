@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createTable, editTable } from "../../features/restaurantsSlice";
 
 const TableCreateForm = (props) => {
-    const initialState = { name: "", seats: 0, spaceId: 0, restId: 0, posx: 0, posy: 0, tableOpts:[] };
+    const initialState = { tableName: "", seats: 0, spaceId: 0, restId: 0, posx: 0, posy: 0, tableOpts: [] };
     const { open, setOpen, edit, table, spaceId } = props.props;
     const rest = useSelector((state) => state.restaurants);
     const [form, setForm] = useState(initialState);
@@ -34,11 +34,11 @@ const TableCreateForm = (props) => {
     useEffect(() => {
         if (open)
             if (edit) {
-                setForm({ name: table.name ?? "", seats: table.seats ?? 0, spaceId: table.spaceId, restId: rest.active._id, tableId: table._id, tableOpts: table.tableOpts });
-                setTableOpts(...rest.active.tableOpts);
+                setForm({ tableName: table.name ?? "1", seats: table.seats ?? 0, spaceId: table.spaceId, restId: rest.active._id, tableId: table._id, tableOpts: table.tableOpts });
+                setTableOpts(rest.active.tableOpts);
             } else {
-                setForm({ name: "", seats: 0, posx: table.posx, spaceId: table.spaceId, restId: rest.active._id, tableOpts: [] });
-                setTableOpts(...rest.active.tableOpts);
+                setForm({ tableName: "", seats: 0, posx: table.posx, spaceId: table.spaceId, restId: rest.active._id, tableOpts: [] });
+                setTableOpts(rest.active.tableOpts);
             }
     }, [open]);
 
@@ -53,7 +53,20 @@ const TableCreateForm = (props) => {
                     </DialogContentText>
                 )}
 
-                <TextField autoFocus margin="dense" id="name" name="name" label="Név" type="text" fullWidth variant="standard" onChange={handleChange} value={form.name} required />
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="tableName"
+                    name="tableName"
+                    autoComplete="off"
+                    label="Név"
+                    type="text"
+                    fullWidth
+                    variant="standard"
+                    onChange={handleChange}
+                    value={form.tableName}
+                    required
+                />
                 <TextField margin="dense" id="seats" name="seats" label="Ülések Száma" type="number" min="0" variant="standard" onChange={handleChange} value={form.seats} />
 
                 <Autocomplete
