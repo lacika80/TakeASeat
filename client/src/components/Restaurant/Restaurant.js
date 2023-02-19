@@ -94,20 +94,7 @@ function Restaurant({ socket }) {
         );
     };
     useEffect(() => {
-        dispatch(getActive(restId))
-            .then(unwrapResult)
-            .then((obj) => {});
-        if (socket) {
-            console.log("subscribed");
-            socket.on(`refresh-rest-${restId}`, () => {
-                console.log("frissités");
-                dispatch(getActive(restId));
-            });
-            return () => {
-                //when leave the page cleaning the listener
-                socket.off(`refresh-rest-${restId}`);
-            };
-        }
+        dispatch(getActive(restId));
     }, [socket]);
     useEffect(() => {
         if (rest.active && user.lastActiveRest?._id != rest.active._id && rest.status != "loading")
@@ -118,7 +105,7 @@ function Restaurant({ socket }) {
 
     return (
         <>
-            {rest.status == "loading" && <LinearProgress />}
+           
             <Box sx={{ display: "flex" }}>
                 <Main open={addRes}>
                     <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
@@ -126,13 +113,13 @@ function Restaurant({ socket }) {
 
                         <Grid container spacing={1} sx={{ py: 1 }} direction="row" justifyContent="center" alignItems="center">
                             {/* Button's grid */}
-                            <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} />
+                            <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} socket={socket} />
                             {/* Tables' grid */}
                             {rest.active?.spaces &&
                                 rest.active.spaces.map(
                                     (space) =>
                                         space.tables && (
-                                            <Grid key={space._id} container spacing={0} sx={{ mt: 3, pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
+                                            <Grid key={space._id} container spacing={0} sx={{ pb: 10 }} direction="row" justifyContent="flex-start" alignItems="flex-start">
                                                 {space.tables.map((tableColumn, index) => (
                                                     <Grid
                                                         key={`column${index}`}
@@ -156,8 +143,8 @@ function Restaurant({ socket }) {
                                                     </Grid>
                                                 ))}
                                                 {/* -------------------------EZT CHECKOLNI --------------------------------------- */}
-                                               
-                                                {editingTableList && space.tables.length < 4  && (
+
+                                                {editingTableList && space.tables.length < 4 && (
                                                     <Grid container item spacing={2} direction="column" justifyContent="flex-start" alignItems="center" lg={3} md={4} sm={6} sx={{ mb: 2 }}>
                                                         {tableAddButton(space.tables.length, space._id)}
                                                     </Grid>
