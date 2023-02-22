@@ -37,10 +37,10 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                 <Grid>
                     <Button>Foglalások listája</Button>
                 </Grid>
-                <Grid>
+                {/* <Grid>
                     <Button>Étterem beállításaid</Button>
-                </Grid>
-                {permission & process.env.REACT_APP_R_VIEW_USERS || permission & process.env.REACT_APP_R_INVITE ? (
+                </Grid> */}
+                {/* {permission & process.env.REACT_APP_R_VIEW_USERS || permission & process.env.REACT_APP_R_INVITE ? (
                     <Grid>
                         <Button component={Link} to={`/rest/${restId}/users`}>
                             Felhasználók
@@ -48,7 +48,7 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                     </Grid>
                 ) : (
                     <></>
-                )}
+                )} */}
                 {permission & process.env.REACT_APP_R_VIEW_REST_GLOBALS ? (
                     <Grid>
                          <Button component={Link} to={`/rest/${restId}/settings`}>Étterem kezelése</Button>
