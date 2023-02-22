@@ -51,7 +51,7 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                 )}
                 {permission & process.env.REACT_APP_R_VIEW_REST_GLOBALS ? (
                     <Grid>
-                        <Button>Étterem kezelése</Button>
+                         <Button component={Link} to={`/rest/${restId}/settings`}>Étterem kezelése</Button>
                     </Grid>
                 ) : (
                     <></>

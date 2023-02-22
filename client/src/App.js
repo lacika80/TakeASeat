@@ -21,6 +21,7 @@ import UserList from "./components/Admin/UserList/UserList";
 import RequireAuth from "./features/RequireAuth";
 import { relogin } from "./features/authSlice";
 import RestUserList from "./components/Restaurant/RestUserList";
+import  RestSettings from './components/Restaurant/Settings'
 
 export default function App() {
     const auth = useSelector((state) => state.auth);
@@ -70,6 +71,7 @@ export default function App() {
                         </Route>
                         <Route path="/rest/:restId" element={<Restaurant socket={socket} />} />
                         <Route path="/rest/:restId/users" element={<RestUserList socket={socket} />} />
+                        <Route path="/rest/:restId/settings" element={<RestSettings socket={socket} />} />
                     </Route>
                 </Route>
             </Route>
