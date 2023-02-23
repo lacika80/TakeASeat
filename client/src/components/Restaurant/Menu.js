@@ -1,4 +1,4 @@
-import { Container, Divider, Button, LinearProgress } from "@mui/material";
+import { Container, Divider, Button, LinearProgress, Paper } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,21 +26,22 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
     }, [socket]);
 
     return (
-        <Container maxWidth="xl" sx={{ mb: 3 }}>
-             {rest.status == "loading" && <LinearProgress />}
-            <Grid container direction="row" justifyContent="flex-start" alignItems="center" spacing={1} my={0.5}>
-                <Grid>
-                    <Button component={Link} to={`/rest/${restId}`}>
-                        Asztal térkép
-                    </Button>
-                </Grid>
-                <Grid>
-                    <Button>Foglalások listája</Button>
-                </Grid>
-                {/* <Grid>
+        <Container maxWidth="xl">
+            <Paper elevation={5}>
+                {rest.status == "loading" && <LinearProgress />}
+                <Grid container direction="row" justifyContent="flex-start" alignItems="center" spacing={1} my={0.5}>
+                    <Grid>
+                        <Button component={Link} to={`/rest/${restId}`}>
+                            Asztal térkép
+                        </Button>
+                    </Grid>
+                    <Grid>
+                        <Button>Foglalások listája</Button>
+                    </Grid>
+                    {/* <Grid>
                     <Button>Étterem beállításaid</Button>
                 </Grid> */}
-                {/* {permission & process.env.REACT_APP_R_VIEW_USERS || permission & process.env.REACT_APP_R_INVITE ? (
+                    {/* {permission & process.env.REACT_APP_R_VIEW_USERS || permission & process.env.REACT_APP_R_INVITE ? (
                     <Grid>
                         <Button component={Link} to={`/rest/${restId}/users`}>
                             Felhasználók
@@ -49,61 +50,61 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                 ) : (
                     <></>
                 )} */}
-                {permission & process.env.REACT_APP_R_VIEW_REST_GLOBALS ? (
-                    <Grid>
-                         <Button component={Link} to={`/rest/${restId}/settings`}>Étterem kezelése</Button>
-                    </Grid>
-                ) : (
-                    <></>
-                )}
-
-                {permission & process.env.REACT_APP_R_CREATE_TABLE ? (
-                    <>
+                    {permission & process.env.REACT_APP_R_VIEW_REST_GLOBALS ? (
                         <Grid>
-                            {editingTableList ? (
-                                <Button disabled>Asztallista Szerkesztése</Button>
-                            ) : rest.active && rest.status == "succeeded" && rest.active.spaces[0].tables.length == 0 ? (
-                                <Button
-                                    color="success"
-                                    onClick={() => {
-                                        setEditingTableList(true);
-                                        setAddRes(false);
-                                    }}
-                                >
-                                    Asztallista Szerkesztése
-                                </Button>
-                            ) : (
-                                <Button
-                                    onClick={() => {
-                                        setEditingTableList(true);
-                                        setAddRes(false);
-                                    }}
-                                >
-                                    Asztallista Szerkesztése
-                                </Button>
-                            )}
+                            <Button component={Link} to={`/rest/${restId}/settings`}>
+                                Étterem kezelése
+                            </Button>
                         </Grid>
-                        {editingTableList ? (
+                    ) : (
+                        <></>
+                    )}
+
+                    {permission & process.env.REACT_APP_R_CREATE_TABLE ? (
+                        <>
                             <Grid>
-                                <Button
-                                    onClick={() => {
-                                        setEditingTableList(false);
-                                    }}
-                                >
-                                    Kész
-                                </Button>
+                                {editingTableList ? (
+                                    <Button disabled>Asztallista Szerkesztése</Button>
+                                ) : rest.active && rest.status == "succeeded" && rest.active.spaces[0].tables.length == 0 ? (
+                                    <Button
+                                        color="success"
+                                        onClick={() => {
+                                            setEditingTableList(true);
+                                            setAddRes(false);
+                                        }}
+                                    >
+                                        Asztallista Szerkesztése
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={() => {
+                                            setEditingTableList(true);
+                                            setAddRes(false);
+                                        }}
+                                    >
+                                        Asztallista Szerkesztése
+                                    </Button>
+                                )}
                             </Grid>
-                        ) : (
-                            <></>
-                        )}
-                    </>
-                ) : (
-                    <></>
-                )}
-            </Grid>
-            <Container>
-                <Divider />
-            </Container>
+                            {editingTableList ? (
+                                <Grid>
+                                    <Button
+                                        onClick={() => {
+                                            setEditingTableList(false);
+                                        }}
+                                    >
+                                        Kész
+                                    </Button>
+                                </Grid>
+                            ) : (
+                                <></>
+                            )}
+                        </>
+                    ) : (
+                        <></>
+                    )}
+                </Grid>
+            </Paper>
         </Container>
     );
 };

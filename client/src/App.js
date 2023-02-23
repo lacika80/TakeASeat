@@ -21,7 +21,8 @@ import UserList from "./components/Admin/UserList/UserList";
 import RequireAuth from "./features/RequireAuth";
 import { relogin } from "./features/authSlice";
 import RestUserList from "./components/Restaurant/RestUserList";
-import  RestSettings from './components/Restaurant/Settings'
+import RestSettings from "./components/Restaurant/Settings";
+import TableList from './components/Restaurant/TableList'
 
 export default function App() {
     const auth = useSelector((state) => state.auth);
@@ -69,9 +70,11 @@ export default function App() {
                         <Route path="userlist" element={<RequireGPerm allowedRoles={[process.env.REACT_APP_G_LIST_USERS]} />}>
                             <Route index element={<UserList socket={socket} />} />
                         </Route>
-                        <Route path="/rest/:restId" element={<Restaurant socket={socket} />} />
-                        <Route path="/rest/:restId/users" element={<RestUserList socket={socket} />} />
-                        <Route path="/rest/:restId/settings" element={<RestSettings socket={socket} />} />
+                        <Route path="/rest/:restId" element={<Restaurant socket={socket} />}>
+                            <Route path="/rest/:restId/" element={<TableList socket={socket} />} />
+                            <Route path="users" element={<RestUserList socket={socket} />} />
+                            <Route path="settings" element={<RestSettings socket={socket} />} />
+                        </Route>
                     </Route>
                 </Route>
             </Route>
