@@ -46,7 +46,7 @@ export const deleteRestaurant = async (req, res) => {};
 export const getRestaurants = async (req, res) => {
     const user = await userModel
         .findById(req.userId, "restaurants")
-        .populate({ path: "restaurants", select: ["name", "owner", "createdAt"], populate: { path: "owner", select: ["first_name", "last_name"] } });
+        .populate({ path: "restaurants", select: ["name", "owner", "createdAt"], populate: { path: "owner", select: ["first_name", "last_name"] } }).populate("reservations");
     return res.status(200).json(user.restaurants);
 };
 export const getRestaurant = async (req, res) => {

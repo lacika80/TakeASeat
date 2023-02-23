@@ -79,6 +79,12 @@ const restaurantSchema = mongoose.Schema(
             free_time: { type: Number, default: 0 },
             basicPerm: { type: Number, default: 0 },
         },
+        reservations: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Reservation",
+            },
+        ],
     },
     {
         timestamps: true,

@@ -2,7 +2,7 @@
 //---------------- Work In Progress
 //----------------
 import React, { useEffect, useState } from "react";
-import { Alert, Box, Button, Divider, Fab, Grid, LinearProgress, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Divider, Fab, Grid, LinearProgress, Paper, Slider, Stack, TextField, Typography } from "@mui/material";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Container } from "@mui/system";
@@ -22,6 +22,7 @@ import { getActive } from "../../features/restaurantsSlice";
 import { setACtiveRest, relogin } from "../../features/authSlice";
 import Menu from "./Menu";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { DesktopDatePicker } from "@mui/x-date-pickers";
 
 const drawerWidth = 400;
 
@@ -55,24 +56,42 @@ const fabStyle = {
     bottom: 20,
     right: 20,
 };
+const marks = [
+    {
+        value: 120,
+        label: "10:00",
+    },
+    {
+        value: 180,
+        label: "15:00",
+    },
+    {
+        value: 240,
+        label: "20:00",
+    },
+];
 
 /* function compareGrid(a, b) {
     if (a.posx > b.posx || (a.posx == b.posx && a.posy > b.posy)) return 1;
     else return -1;
 } */
-const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableId: [] };
 
 function TableList({ socket }) {
-    const {editingTableList, setEditingTableList, setAddRes, addRes} = useOutletContext();
+    const { editingTableList, setEditingTableList, setAddRes, addRes } = useOutletContext();
     const auth = useSelector((state) => state.auth);
     const user = auth.user;
+    const { restId } = useParams();
+    const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableIds: [], restId };
     const rest = useSelector((state) => state.restaurants);
     const [addResForm, setAddResForm] = useState(addResInitialState);
-    
+    const [time, setTime] = useState(120);
+
+    const SliderChange = (event, newValue) => {
+        setTime(newValue);
+    };
     const [addTable, setAddTable] = useState(false);
     const [addTableForm, setAddTableForm] = useState({ posx: null, spaceId: null });
     const dispatch = useDispatch();
-    const { restId } = useParams();
     /**
      * creates the buttons for add table
      * @param {Number} posx which column you would like to add the table
@@ -93,6 +112,9 @@ function TableList({ socket }) {
             </Grid>
         );
     };
+    function valuetext(value) {
+        return `${Math.floor(value / 12, 0)}:${(value - Math.floor(value / 12, 0) * 12) * 5 < 10 ? "0" + (value - Math.floor(value / 12, 0) * 12) * 5 : (value - Math.floor(value / 12, 0) * 12) * 5}`;
+    }
 
     return (
         <>
@@ -100,10 +122,26 @@ function TableList({ socket }) {
                 <Main open={addRes}>
                     <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
                         {/* parent grid */}
-
+                        <Grid container fullwidth direction="column" sx={{ pt: 2, mb: 5 }}>
+                            <Grid item>
+                                <DesktopDatePicker label="Date desktop" inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
+                            </Grid>
+                            <Grid item sx={{ mt: 3 }}>
+                                <Slider
+                                    aria-label="Always visible"
+                                    valueLabelDisplay="on"
+                                    getAriaValueText={valuetext}
+                                    valueLabelFormat={valuetext}
+                                    marks={marks}
+                                    max="288"
+                                    value={time}
+                                    onChange={SliderChange}
+                                />
+                            </Grid>
+                        </Grid>
                         <Grid container spacing={1} sx={{ py: 1 }} direction="row" justifyContent="center" alignItems="center">
                             {/* Button's grid */}
-                           {/*  <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} socket={socket} /> */}
+                            {/*  <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} socket={socket} /> */}
                             {/* Tables' grid */}
                             {rest.active?.spaces &&
                                 rest.active.spaces.map(

@@ -22,12 +22,12 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm }) =
         <>
             {addRes ? (
                 <Button
-                    variant={addResForm.tableId.includes(table._id) ? "contained" : "outlined"}
+                    variant={addResForm.tableIds.includes(table._id) ? "contained" : "outlined"}
                     sx={{ width: "10rem" }}
                     onClick={() => {
                         {
-                            if (addResForm.tableId.includes(table._id)) setAddResForm({ ...addResForm, tableId: addResForm.tableId.filter((item) => item != table._id) });
-                            else setAddResForm({ ...addResForm, tableId: [...addResForm.tableId, table._id] });
+                            if (addResForm.tableIds.includes(table._id)) setAddResForm({ ...addResForm, tableIds: addResForm.tableIds.filter((item) => item != table._id) });
+                            else setAddResForm({ ...addResForm, tableIds: [...addResForm.tableIds, table._id] });
                         }
                     }}
                 >
