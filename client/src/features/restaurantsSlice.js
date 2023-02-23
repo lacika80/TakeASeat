@@ -63,6 +63,17 @@ export const createTable = createAsyncThunk("restaurant/createtable", async (for
         return rejectWithValue(err);
     }
 });
+
+export const createReservation = createAsyncThunk("restaurant/createReservation", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.createReservation(formData);
+        console.log(response);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
+
 export const editTable = createAsyncThunk("restaurant/editTable", async (formData, { rejectWithValue }) => {
     try {
         const response = await api.editTable(formData);

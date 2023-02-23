@@ -124,13 +124,13 @@ export default function Navbar() {
                                     ) : (
                                         ""
                                     )}
-                                    <Grid>
+                                   {/*  <Grid>
                                         {user.lastActiveRest && (
                                             <Button color="inherit" component={Link} to={`/rest/${user.lastActiveRest._id}/users`}>
                                                 Felhasználók
                                             </Button>
                                         )}
-                                    </Grid>
+                                    </Grid> */}
                                 </Grid>
                                 <Grid>
                                     <Typography>{user.lastName + " " + user.firstName}</Typography>

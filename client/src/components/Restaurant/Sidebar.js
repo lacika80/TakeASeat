@@ -8,13 +8,15 @@ import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import moment, { now } from "moment";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { createReservation } from "../../features/restaurantsSlice";
 
 export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, addResForm, setAddResForm }) {
     const rest = useSelector((state) => state.restaurants);
-    const [tableOpts, setTableOpts] = useState([])
+    const [tableOpts, setTableOpts] = useState([]);
+    const dispatch = useDispatch();
     useEffect(() => {
-        if (addRes) setTableOpts(...rest.active.tableOpts);
+        if (addRes) setTableOpts(rest.active.tableOpts);
         console.log(tableOpts);
     }, [addRes]);
 
@@ -37,7 +39,13 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
                 break;
         }
     };
-
+    useEffect(() => {
+        console.log(addResForm.arrive.toString());
+    }, [addResForm]);
+    const handleSubmit = () =>{
+        dispatch(createReservation(addResForm));
+    }
+    
     return (
         <Drawer
             sx={{
@@ -59,16 +67,16 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
             <Divider />
             <Grid container spacing={2} direction="column" alignItems="stretch" sx={{ width: drawerWidth, pl: 2 }}>
                 <Grid>
-                    <TextField fullWidth id="name" type="text" label="Név" variant="standard" name="name" onChange={handleChange} value={addResForm.name} />
+                    <TextField fullWidth id="name" type="text" label="Név" variant="standard" name="name" onChange={handleChange} value={addResForm.name} autoComplete="off" />
                 </Grid>
                 <Grid>
-                    <TextField fullWidth type="tel" id="phone" name="phone" variant="standard" label="Telefonszám" onChange={handleChange} value={addResForm.phone} />
+                    <TextField fullWidth type="tel" id="phone" name="phone" variant="standard" label="Telefonszám" onChange={handleChange} value={addResForm.phone} autoComplete="off" />
                 </Grid>
                 <Grid>
-                    <TextField type="number" id="adult" name="adult" variant="standard" label="Felnőttek száma" onChange={handleChange} value={addResForm.adult} />
+                    <TextField type="number" id="adult" name="adult" variant="standard" label="Felnőttek száma" onChange={handleChange} value={addResForm.adult} autoComplete="off" />
                 </Grid>
                 <Grid>
-                    <TextField type="number" id="child" name="child" variant="standard" label="Gyerekek/babák száma" onChange={handleChange} value={addResForm.child} />
+                    <TextField type="number" id="child" name="child" variant="standard" label="Gyerekek/babák száma" onChange={handleChange} value={addResForm.child} autoComplete="off" />
                 </Grid>
                 <Grid sx={{ mt: 2 }}>
                     <DesktopDatePicker
@@ -100,23 +108,27 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
 
                 <Grid xs={5}>
                     <TimePicker
-                        label="Érkezés"
+                        label="távozás"
                         name="leaveTime"
                         value={addResForm.leave}
-                        minTime={moment("10:00", "HH:mm")}
-                        maxTime={moment("22:00", "HH:mm")}
+                        /* minTime={moment("10:00", "HH:mm")}
+                        maxTime={moment("22:00", "HH:mm")} */
                         ampm={false}
-                        shouldDisableTime={shouldDisableTime}
+                        /* shouldDisableTime={shouldDisableTime} */
                         onChange={handleLeaveDateChange}
                         renderInput={(params) => <TextField {...params} />}
                     />
                 </Grid>
-                {addRes && tableOpts.length  > 0 &&(
+                {addRes && tableOpts.length > 0 && (
                     <Grid>
                         <Autocomplete
                             multiple
                             id="tags-standard"
                             options={tableOpts}
+                            onChange={(event, newInputValue) => {
+                                console.log(event);
+                                setAddResForm({ ...addResForm, tableReqs: newInputValue });
+                            }}
                             disableCloseOnSelect
                             getOptionLabel={(option) => option}
                             renderInput={(params) => <TextField {...params} variant="standard" label="Hely igények" />}
@@ -129,7 +141,7 @@ export default function Sidebar({ addRes, setAddRes, DrawerHeader, drawerWidth, 
                     </Typography>
                 </Grid>
                 <Grid>
-                    <Button variant="contained" fullWidth>
+                    <Button variant="contained" fullWidth onClick={handleSubmit}>
                         Foglalás véglegesítése
                     </Button>
                 </Grid>

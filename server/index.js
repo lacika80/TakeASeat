@@ -15,6 +15,7 @@ import { fileURLToPath } from "url";
 import sockets from "./socket/sockets.js";
 import { getIdFromToken } from "./middleware/auth.js";
 import moment from "moment";
+import reservation from './routes/reservation.js'
 
 const app = express();
 dotenv.config();
@@ -56,6 +57,7 @@ app.use("/user", userRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/verify", dynamicLinkRouter);
 app.use("/admin", adminRouter);
+app.use("/reservation", reservation);
 
 const PORT = process.env.PORT || 5000;
 //database connecting

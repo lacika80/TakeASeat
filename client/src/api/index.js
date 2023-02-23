@@ -117,3 +117,9 @@ export const deleteTable = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
+    
+    export const createReservation = (data) =>
+    API.post("reservation", data).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });

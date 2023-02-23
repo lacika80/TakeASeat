@@ -25,6 +25,7 @@ implementation guide in hungary:
 
  */
 export const createReservation = async (req, res) =>{
+    console.log(req.body);
     return res.status(501).json({ error: "Nincs elkészítve" });
 };
 

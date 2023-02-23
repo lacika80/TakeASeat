@@ -60,7 +60,7 @@ const fabStyle = {
     if (a.posx > b.posx || (a.posx == b.posx && a.posy > b.posy)) return 1;
     else return -1;
 } */
-const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableId: "" };
+const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableId: [] };
 
 function TableList({ socket }) {
     const {editingTableList, setEditingTableList, setAddRes, addRes} = useOutletContext();

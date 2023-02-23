@@ -4,7 +4,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TableCreateForm from "./TableCreateForm";
 import { useDispatch } from "react-redux";
-import {deleteTable as deltable} from '../../features/restaurantsSlice'
+import { deleteTable as deltable } from "../../features/restaurantsSlice";
 import { useParams } from "react-router-dom";
 
 const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm }) => {
@@ -22,12 +22,12 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm }) =
         <>
             {addRes ? (
                 <Button
-                    variant={addResForm.tableId == table._id ? "contained" : "outlined"}
+                    variant={addResForm.tableId.includes(table._id) ? "contained" : "outlined"}
                     sx={{ width: "10rem" }}
                     onClick={() => {
                         {
-                            setAddResForm({ ...addResForm, tableId: table._id });
-                            console.log(addResForm);
+                            if (addResForm.tableId.includes(table._id)) setAddResForm({ ...addResForm, tableId: addResForm.tableId.filter((item) => item != table._id) });
+                            else setAddResForm({ ...addResForm, tableId: [...addResForm.tableId, table._id] });
                         }
                     }}
                 >
