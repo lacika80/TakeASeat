@@ -16,10 +16,11 @@ const reservationSchema = mongoose.Schema(
             },
         ],
         tableReqs: [String],
-        creater:  {
+        creater: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
+        came: { type: Boolean, default: "false" },
     },
     { timestamps: true }
 );

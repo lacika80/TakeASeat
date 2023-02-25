@@ -174,7 +174,15 @@ function TableList({ socket }) {
                                                     >
                                                         {tableColumn.map((table, index2) => (
                                                             <Grid item key={`table${index}${index2}`}>
-                                                                <Table table={table} editingTableList={editingTableList} addRes={addRes} addResForm={addResForm} setAddResForm={setAddResForm} />
+                                                                <Table
+                                                                    table={table}
+                                                                    editingTableList={editingTableList}
+                                                                    addRes={addRes}
+                                                                    addResForm={addResForm}
+                                                                    setAddResForm={setAddResForm}
+                                                                    reservation={rest.active.reservations.filter((item) => item.tableIds.includes(table._id))}
+                                                                    time={time}
+                                                                />
                                                             </Grid>
                                                         ))}
                                                         {editingTableList && tableAddButton(index, space._id)}
