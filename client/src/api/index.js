@@ -103,7 +103,7 @@ export const createTable = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
-    export const editTable = (data) =>
+export const editTable = (data) =>
     API.patch(`restaurant/${data.restId}/table`, data).catch(function (error) {
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
@@ -117,9 +117,14 @@ export const deleteTable = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
-    
-    export const createReservation = (data) =>
+
+export const createReservation = (data) =>
     API.post("reservation", data).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });
+export const guestIsHere = (data) =>
+    API.post("reservation/guestIsHere", data).catch(function (error) {
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });

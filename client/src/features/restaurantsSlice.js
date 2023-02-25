@@ -91,7 +91,14 @@ export const deleteTable = createAsyncThunk("restaurant/deleteTable", async (for
         return rejectWithValue(err);
     }
 });
-
+export const guestIsHere = createAsyncThunk("restaurant/guestIsHere", async (formData, { rejectWithValue }) => {
+    try {
+        const response = await api.guestIsHere(formData);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
 const restaurantsSlice = createSlice({
     name: "restaurants",
     initialState,

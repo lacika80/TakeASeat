@@ -1,12 +1,13 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Stack, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import TableCreateForm from "./TableCreateForm";
 import { useDispatch } from "react-redux";
-import { deleteTable as deltable } from "../../features/restaurantsSlice";
+import { deleteTable as deltable, guestIsHere } from "../../features/restaurantsSlice";
 import { useParams } from "react-router-dom";
 import moment from "moment";
+import Grid from "@mui/material/Unstable_Grid2/Grid2";
 
 /*
 asztal státuszok:
@@ -23,6 +24,7 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
     const dispatch = useDispatch();
     const { restId } = useParams();
     const [resChecker, setResChecker] = useState({ inTime: false, here: false, close: false });
+    const [actRes, setActRes] = useState("");
 
     const deleteTable = () => {
         setDeleting(false);
@@ -31,8 +33,13 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
     useEffect(() => {
         console.log(time);
         reservation.map((res) => {
-            if (moment(res.arrive) <= time && moment(res.leave) >= time) setResChecker({ ...resChecker, inTime: true, here: res.came });
-            else setResChecker({ ...resChecker, inTime: false });
+            if (moment(res.arrive) <= time && moment(res.leave) >= time) {
+                setResChecker({ ...resChecker, inTime: true, here: res.came });
+                setActRes(res._id);
+            } else {
+                setResChecker({ ...resChecker, inTime: false });
+                setActRes("");
+            }
         });
     }, [reservation, time]);
 
@@ -48,11 +55,11 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
                         else setAddResForm({ ...addResForm, tableIds: [...addResForm.tableIds, table._id] });
                     }}
                 >
-                    <Typography>{table.name}</Typography>
+                    <Typography align="center">{table.name}</Typography>
                 </Button>
             ) : editingTableList == true ? (
                 <Button component="div" variant="outlined" sx={{ width: "12rem" }} color="neutral">
-                    <Typography>{table.name}</Typography>
+                    <Typography align="center">{table.name}</Typography>
                     <IconButton
                         aria-label="delete"
                         color="error"
@@ -74,16 +81,45 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
                         <EditIcon color="primary" fontSize="small" />
                     </IconButton>
                 </Button>
-            ) : (
+            ) : resChecker.here ? (
                 <Button
                     variant={resChecker.inTime ? "contained" : "outlined"}
-                    color={resChecker.inTime ? (resChecker.here ? "success" : "error") : "primary"}
+                    color={resChecker.inTime ? "success" : "primary"}
                     sx={{ width: "10rem" }}
                     onClick={() => {
                         console.log(table.name);
                     }}
                 >
-                    <Typography>{table.name}</Typography>
+                    <Typography align="center">{table.name}</Typography>
+                </Button>
+            ) : (
+                <Button
+                    component="div"
+                    variant={resChecker.inTime ? "contained" : "outlined"}
+                    color={resChecker.inTime ? "error" : "primary"}
+                    sx={{ width: "10rem", px: 0 }}
+                    onClick={() => {
+                        console.log(table.name);
+                    }}
+                >
+                    <Grid container direction="row" justifyContent="center" alignItems="center" p={0} m={0}>
+                        {resChecker.inTime && <Grid sx={{ p: 0 }} xs={3}></Grid>}
+                        <Grid sx={{ p: 0 }} xs={6}>
+                            <Typography align="center">asd</Typography>
+                        </Grid>
+                        {resChecker.inTime && (
+                            <Grid sx={{ p: 0 }} xs={3}>
+                                <Button
+                                    size="small"
+                                    onClick={() => {
+                                        dispatch(guestIsHere({resId:actRes, restId}));
+                                    }}
+                                >
+                                    here
+                                </Button>
+                            </Grid>
+                        )}
+                    </Grid>
                 </Button>
             )}
             <Dialog open={deleting} onClose={() => setDeleting(false)}>
