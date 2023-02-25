@@ -84,10 +84,20 @@ function TableList({ socket }) {
     const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableIds: [], restId };
     const rest = useSelector((state) => state.restaurants);
     const [addResForm, setAddResForm] = useState(addResInitialState);
-    const [time, setTime] = useState(120);
+    const [time, setTime] = useState(moment());
 
     const SliderChange = (event, newValue) => {
-        setTime(newValue);
+        let newTime = moment.unix(time.unix());
+        newTime.hour(Math.floor(newValue / 12));
+        newTime.minute((newValue - Math.floor(newValue / 12) * 12) * 5);
+        setTime(newTime);
+    };
+    const TimeDateChanger = (value) => {
+        let newTime = moment.unix(time.unix());
+        newTime.date(value.date());
+        newTime.month(value.month());
+        newTime.year(value.year());
+        setTime(newTime);
     };
     const [addTable, setAddTable] = useState(false);
     const [addTableForm, setAddTableForm] = useState({ posx: null, spaceId: null });
@@ -124,7 +134,7 @@ function TableList({ socket }) {
                         {/* parent grid */}
                         <Grid container fullwidth direction="column" sx={{ pt: 2, mb: 5 }}>
                             <Grid item>
-                                <DesktopDatePicker label="Date desktop" inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
+                                <DesktopDatePicker label="Date desktop" value={time} onChange={TimeDateChanger} inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
                             </Grid>
                             <Grid item sx={{ mt: 3 }}>
                                 <Slider
@@ -134,7 +144,7 @@ function TableList({ socket }) {
                                     valueLabelFormat={valuetext}
                                     marks={marks}
                                     max="288"
-                                    value={time}
+                                    value={time.hours() * 12 + Math.floor(time.minutes() / 5)}
                                     onChange={SliderChange}
                                 />
                             </Grid>

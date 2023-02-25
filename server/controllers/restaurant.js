@@ -46,7 +46,7 @@ export const deleteRestaurant = async (req, res) => {};
 export const getRestaurants = async (req, res) => {
     const user = await userModel
         .findById(req.userId, "restaurants")
-        .populate({ path: "restaurants", select: ["name", "owner", "createdAt"], populate: { path: "owner", select: ["first_name", "last_name"] } }).populate("reservations");
+        .populate({ path: "restaurants", select: ["name", "owner", "createdAt"], populate: { path: "owner", select: ["first_name", "last_name"] } });
     return res.status(200).json(user.restaurants);
 };
 export const getRestaurant = async (req, res) => {
@@ -64,7 +64,7 @@ export const getRestaurant = async (req, res) => {
                     path: "spaces",
                     // Get friends of friends - populate the 'friends' array for every friend
                     populate: { path: "tables" },
-                })
+                }).populate("reservations")
             ).toObject();
             restaurant.users.map((item) => {
                 if (user._id.toString() == item.user.toString()) restaurant.permission = item.permission;
@@ -179,7 +179,7 @@ implementation guide in hungary:
 export const createTable = async (req, res) => {
     try {
         const { tableName, seats, posx, spaceId, restId } = req.body;
-        let tableOpts = [...(new Set(req.body.tableOpts))];
+        let tableOpts = [...new Set(req.body.tableOpts)];
         //get the restaurant and the requester's permission
         const rest = await restaurantModel.findById(restId);
         const restUser = rest.users.filter((user) => user.user.toString() == req.userId)[0];
@@ -188,7 +188,7 @@ export const createTable = async (req, res) => {
         space.tables = space.tables.filter((table) => table.is_active === true);
         const posy = space.tables.length > 0 ? Math.max(...space.tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1 : 0;
         //const posy = Math.max(...(await SpaceModel.findById(spaceId).lean()).tables.filter((table) => table.posx == posx).map((table) => table.posy)) + 1;
-        const table = await TableModel.create({ name:tableName, posx, posy, seats, tableOpts });
+        const table = await TableModel.create({ name: tableName, posx, posy, seats, tableOpts });
         const updated = await SpaceModel.findByIdAndUpdate(
             spaceId,
             {
@@ -215,9 +215,9 @@ implementation guide in hungary:
  */
 export const editTable = async (req, res) => {
     const { tableName, seats, tableId, restId } = req.body;
-    let tableOpts = [...(new Set(req.body.tableOpts))];
+    let tableOpts = [...new Set(req.body.tableOpts)];
     try {
-        await TableModel.findByIdAndUpdate(tableId, { name:tableName, seats, tableOpts });
+        await TableModel.findByIdAndUpdate(tableId, { name: tableName, seats, tableOpts });
         req.io.emit(`refresh-rest-${restId}`);
         return res.status(202).json({});
     } catch (error) {
