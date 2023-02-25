@@ -133,8 +133,9 @@ function TableList({ socket }) {
                     <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
                         {/* parent grid */}
                         <Grid container fullwidth direction="column" sx={{ pt: 2, mb: 5 }}>
-                            <Grid item>
-                                <DesktopDatePicker label="Date desktop" value={time} onChange={TimeDateChanger} inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
+                            <Grid item  container alignItems="center" >
+                                <DesktopDatePicker label="Dátum választó" value={time} onChange={TimeDateChanger} inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
+                                <Button sx={{mx:2}} onClick={()=>{setTime(moment())}}>Most</Button>
                             </Grid>
                             <Grid item sx={{ mt: 3 }}>
                                 <Slider
