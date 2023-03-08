@@ -22,7 +22,8 @@ import RequireAuth from "./features/RequireAuth";
 import { relogin } from "./features/authSlice";
 import RestUserList from "./components/Restaurant/RestUserList";
 import RestSettings from "./components/Restaurant/Settings";
-import TableList from './components/Restaurant/TableList'
+import TableList from "./components/Restaurant/TableList";
+import ReservationList from "./components/Restaurant/ReservationList";
 
 export default function App() {
     const auth = useSelector((state) => state.auth);
@@ -71,7 +72,8 @@ export default function App() {
                             <Route index element={<UserList socket={socket} />} />
                         </Route>
                         <Route path="/rest/:restId" element={<Restaurant socket={socket} />}>
-                            <Route path="/rest/:restId/" element={<TableList socket={socket} />} />
+                            <Route path="" element={<TableList socket={socket} />} />
+                            <Route path="reservations" element={<ReservationList />} />
                             <Route path="users" element={<RestUserList socket={socket} />} />
                             <Route path="settings" element={<RestSettings socket={socket} />} />
                         </Route>

@@ -31,12 +31,12 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                 {rest.status == "loading" && <LinearProgress />}
                 <Grid container direction="row" justifyContent="flex-start" alignItems="center" spacing={1} my={0.5}>
                     <Grid>
-                        <Button component={Link} to={`/rest/${restId}`}>
+                        <Button component={Link} to={``}>
                             Asztal térkép
                         </Button>
                     </Grid>
                     <Grid>
-                        <Button>Foglalások listája</Button>
+                        <Button component={Link} to={`reservations`}>Foglalások listája</Button>
                     </Grid>
                     {/* <Grid>
                     <Button>Étterem beállításaid</Button>
@@ -52,7 +52,7 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                 )} */}
                     {permission & process.env.REACT_APP_R_VIEW_REST_GLOBALS ? (
                         <Grid>
-                            <Button component={Link} to={`/rest/${restId}/settings`}>
+                            <Button component={Link} to={`settings`}>
                                 Étterem kezelése
                             </Button>
                         </Grid>
