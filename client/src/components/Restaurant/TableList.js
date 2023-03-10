@@ -132,10 +132,17 @@ function TableList({ socket }) {
                 <Main open={addRes}>
                     <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
                         {/* parent grid */}
-                        <Grid container fullwidth direction="column" sx={{ pt: 2, mb: 5 }}>
-                            <Grid item  container alignItems="center" >
+                        <Grid container direction="column" sx={{ pt: 2, mb: 5 }}>
+                            <Grid item container alignItems="center">
                                 <DesktopDatePicker label="Dátum választó" value={time} onChange={TimeDateChanger} inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
-                                <Button sx={{mx:2}} onClick={()=>{setTime(moment())}}>Most</Button>
+                                <Button
+                                    sx={{ mx: 2 }}
+                                    onClick={() => {
+                                        setTime(moment());
+                                    }}
+                                >
+                                    Most
+                                </Button>
                             </Grid>
                             <Grid item sx={{ mt: 3 }}>
                                 <Slider
@@ -144,7 +151,7 @@ function TableList({ socket }) {
                                     getAriaValueText={valuetext}
                                     valueLabelFormat={valuetext}
                                     marks={marks}
-                                    max="288"
+                                    max={288}
                                     value={time.hours() * 12 + Math.floor(time.minutes() / 5)}
                                     onChange={SliderChange}
                                 />

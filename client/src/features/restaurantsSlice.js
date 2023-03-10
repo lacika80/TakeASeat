@@ -99,6 +99,15 @@ export const guestIsHere = createAsyncThunk("restaurant/guestIsHere", async (for
         return rejectWithValue(err);
     }
 });
+export const getDetailedReservations = createAsyncThunk("restaurant/getDetailedReservations", async (restId, { rejectWithValue }) => {
+    try {
+        const response = await api.getDetailedReservations(restId);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
+
 const restaurantsSlice = createSlice({
     name: "restaurants",
     initialState,
@@ -140,9 +149,9 @@ const restaurantsSlice = createSlice({
                     const t2 = [];
                     let last = { posx: false };
                     space.tables.forEach((element) => {
-                        element.tableOpts.forEach((opt)=>{
+                        element.tableOpts.forEach((opt) => {
                             tableOptsSet.add(opt);
-                        })
+                        });
                         if (last.posx === false || last.posx != element.posx) {
                             t2.push([element]);
                         } else {
@@ -152,7 +161,7 @@ const restaurantsSlice = createSlice({
                     });
                     action.payload.data.restaurant.spaces[index].tables = t2;
                 });
-                action.payload.data.restaurant.tableOpts=[...tableOptsSet];
+                action.payload.data.restaurant.tableOpts = [...tableOptsSet];
                 state.active = action.payload.data.restaurant;
                 //state.active.permission=0;
             })
@@ -182,7 +191,15 @@ const restaurantsSlice = createSlice({
             .addCase(createTable.rejected, (state, action) => {
                 state.status = "failed";
                 state.error = action.payload.data.error;
-            });
+            })
+            .addCase(getDetailedReservations.pending, (state, action) => {
+                state.status = { reservations: "loading" };
+                state.active.reservations = null;
+            })
+            .addCase(getDetailedReservations.fulfilled, (state, action) => {
+                state.status = { reservations: "succeeded" };
+                state.active.reservations = action.payload.data.reservations;
+            })
     },
 });
 

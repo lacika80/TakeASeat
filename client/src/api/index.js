@@ -128,3 +128,12 @@ export const guestIsHere = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
+export const getDetailedReservations = (data) =>
+    API.get(`reservation`, {
+        params: {
+            restId: data,
+        },
+    }).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });

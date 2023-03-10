@@ -16,7 +16,7 @@ const reservationSchema = mongoose.Schema(
             },
         ],
         tableReqs: [String],
-        creater: {
+        creator: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },

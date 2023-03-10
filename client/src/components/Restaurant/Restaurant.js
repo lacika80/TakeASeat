@@ -3,7 +3,7 @@
 //----------------
 import React, { useEffect, useState } from "react";
 import { Alert, Box, Button, Divider, Fab, LinearProgress, Paper, Typography } from "@mui/material";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Container } from "@mui/system";
 import Sidebar from "./Sidebar";
@@ -18,7 +18,7 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { CheckRPerm } from "../../features/CheckRPerm";
 
-import { getActive } from "../../features/restaurantsSlice";
+import { getActive, getDetailedReservations } from "../../features/restaurantsSlice";
 import { setACtiveRest, relogin } from "../../features/authSlice";
 import Menu from "./Menu";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -32,10 +32,15 @@ function Restaurant({ socket }) {
     const { restId } = useParams();
     const [addRes, setAddRes] = useState(false);
     const [editingTableList, setEditingTableList] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
-        dispatch(getActive(restId));
-    }, [socket]);
+        dispatch(getActive(restId))
+            .then(unwrapResult)
+            .then(() => {
+                if (location.pathname.split("/")[3] == "reservations") dispatch(getDetailedReservations(restId));
+            });
+    }, []);
     useEffect(() => {
         if (rest.active && user.lastActiveRest?._id != rest.active._id && rest.status != "loading")
             dispatch(setACtiveRest(restId))
