@@ -12,8 +12,7 @@ router.get("/openhourDeleteCheck", auth, cont.getReservationsInPeriod);
 
 router.post("/", auth, cont.createReservation);
 router.post("/guestIsHere", auth, cont.guestIsHere);
-
-router.patch("/:id", auth, cont.updateReservation);
+router.post("/update", auth, cont.updateReservation);
 
 router.delete("/delete", auth, cont.deleteReservation);
 

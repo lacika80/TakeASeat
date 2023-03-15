@@ -20,6 +20,10 @@ const reservationSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
+        updater: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
         came: { type: Boolean, default: "false" },
     },
     { timestamps: true }

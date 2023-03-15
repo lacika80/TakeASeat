@@ -18,7 +18,7 @@ export const getReservations = async (req, res) => {
             .populate({ path: "reservations", populate: { path: "creator", select: ["first_name", "last_name"] } })
             .populate({ path: "reservations", populate: { path: "tableIds", select: ["name"] } });
         console.log("tids");
-        console.log(rest.reservations[0].creator);
+        console.log(rest.reservations[0]);
         return res.status(200).json({ reservations: rest.reservations });
     } catch (error) {
         console.log("error:");
@@ -59,7 +59,21 @@ implementation guide in hungary:
 
  */
 export const updateReservation = async (req, res) => {
-    return res.status(501).json({ error: "Nincs elkészítve" });
+    try {
+        const reservation = req.body;
+        reservation.tableIds = reservation.tableIds.map((table) => table._id);
+        reservation.creator = reservation.creator._id;
+        delete reservation.createdAt;
+        delete reservation.updatedAt;
+        reservation.updater = req.user._id;
+        await reservationModel.findByIdAndUpdate(reservation._id, reservation);
+        console.log(reservation);
+        return res.status(200).json({});
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
 };
 
 /*

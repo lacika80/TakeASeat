@@ -15,6 +15,8 @@ import { createBrowserRouter, createRoutesFromElements, Link, Navigate, Outlet, 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
+import { SnackbarProvider } from 'notistack';
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 //maretial ui dark theme switcher
 const darkTheme = createTheme({
@@ -32,14 +34,16 @@ const darkTheme = createTheme({
     </React.StrictMode> */
 }
 root.render(
-        <Provider store={store}>
-            <ThemeProvider theme={darkTheme}>
-                <LocalizationProvider dateAdapter={AdapterMoment}>
-                    <BrowserRouter>
+    <Provider store={store}>
+        <ThemeProvider theme={darkTheme}>
+            <LocalizationProvider dateAdapter={AdapterMoment}>
+                <BrowserRouter>
+                    <SnackbarProvider maxSnack={3}>
                         <App />
-                    </BrowserRouter>
-                </LocalizationProvider>
-            </ThemeProvider>
-        </Provider>
+                    </SnackbarProvider>
+                </BrowserRouter>
+            </LocalizationProvider>
+        </ThemeProvider>
+    </Provider>
 );
 //reportWebVitals(console.log);

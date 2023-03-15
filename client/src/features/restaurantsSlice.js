@@ -107,6 +107,14 @@ export const getDetailedReservations = createAsyncThunk("restaurant/getDetailedR
         return rejectWithValue(err);
     }
 });
+export const updateRes = createAsyncThunk("restaurant/updateRes", async (res, { rejectWithValue }) => {
+    try {
+        const response = await api.updateRes(res);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
 
 const restaurantsSlice = createSlice({
     name: "restaurants",
@@ -138,6 +146,8 @@ const restaurantsSlice = createSlice({
             })
             .addCase(getActive.fulfilled, (state, action) => {
                 state.status = "succeeded";
+                //creating table list with id and name for fast accessing
+                action.payload.data.restaurant.tableList = [];
                 //table sorting and grouping for grid visualization
                 let tableOptsSet = new Set();
                 action.payload.data.restaurant.spaces.map((space, index) => {
@@ -145,6 +155,7 @@ const restaurantsSlice = createSlice({
                     space.tables.sort((a, b) => a.posx - b.posx);
                     action.payload.data.restaurant.spaces[index].deletedTables = action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === false);
                     action.payload.data.restaurant.spaces[index].tables = action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === true);
+                    action.payload.data.restaurant.tableList.push(...action.payload.data.restaurant.spaces[index].tables.filter((table) => table.isActive === true));
                     //adding to global tableOpts
                     const t2 = [];
                     let last = { posx: false };

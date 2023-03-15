@@ -11,7 +11,6 @@ const Settings = ({ socket }) => {
         <>
             <Container sx={{ display: "flex" }}>
                 <Paper elevation={5} sx={{ position: "relative", minHeight: "25rem" }}>
-                    <Menu sx={{ my: 1 }} socket={socket} />
                     <Grid container direction="row" justifyContent="center" alignItems="flex-start" spacing={1} my={0.5} sx={{mx:2}}>
                         <Grid sx={{ minHeight:"20rem"}}>
                            <Globals />

@@ -137,3 +137,8 @@ export const getDetailedReservations = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
+    export const updateRes = (data) =>
+    API.post("reservation/update", data).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });
