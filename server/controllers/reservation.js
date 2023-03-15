@@ -76,6 +76,19 @@ export const updateReservation = async (req, res) => {
     }
 };
 
+export const updateReservationTable = async (req, res) => {
+    try {
+        const tableIds = req.body.value.map((table) => table._id);
+        const id = req.body.id;
+        await reservationModel.findByIdAndUpdate(id, {tableIds});
+        return res.status(200).json({});
+    } catch (error) {
+        console.log("error:");
+        console.log(error);
+        return res.status(500).json({ error: "Valami félrement" });
+    }
+};
+
 /*
 implementation guide in hungary:
 

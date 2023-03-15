@@ -25,7 +25,7 @@ import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { getDetailedReservations, updateRes } from "../../features/restaurantsSlice";
+import { getDetailedReservations, modifyResTable, updateRes } from "../../features/restaurantsSlice";
 import { useSnackbar } from "notistack";
 
 const ReservationList = () => {
@@ -40,6 +40,7 @@ const ReservationList = () => {
     const handleArriveDateChange = (val) => setSelected({ ...selected, arrive: val });
     const handleLeaveDateChange = (val) => setSelected({ ...selected, leave: val });
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const [tableSelecting, setTableSelecting] = useState(false);
 
     useEffect(() => {
         if (rest.active && !(rest.status?.reservations == "loading" || rest.status?.reservations == "succeeded")) dispatch(getDetailedReservations(restId));
@@ -95,18 +96,42 @@ const ReservationList = () => {
         <>
             <Container maxWidth="lg">
                 <Paper elevation={5} sx={{ minHeight: "25rem", p: 2 }}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid>
-                            <DesktopDatePicker label="Dátum választó" value={date} onChange={TimeDateChanger} inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
+                    <Grid container justifyContent="space-between" alignItems="center">
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid>
+                                <DesktopDatePicker label="Dátum választó" value={date} onChange={TimeDateChanger} inputFormat="MM/DD/YYYY" renderInput={(params) => <TextField {...params} />} />
+                            </Grid>
+                            <Grid>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                        setDate(moment());
+                                    }}
+                                >
+                                    Most
+                                </Button>
+                            </Grid>
                         </Grid>
                         <Grid>
+                            {tableSelecting && (
+                                <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                        setTableSelecting(false);
+                                    }}
+                                    sx={{ mr: 2 }}
+                                >
+                                    Befejez
+                                </Button>
+                            )}
                             <Button
+                                disabled={tableSelecting}
                                 variant="contained"
                                 onClick={() => {
-                                    setDate(moment());
+                                    setTableSelecting(true);
                                 }}
                             >
-                                Most
+                                Gyors asztal kiválasztás
                             </Button>
                         </Grid>
                     </Grid>
@@ -141,7 +166,7 @@ const ReservationList = () => {
                                             if (a.arrive < b.arrive) return -1;
                                         })
                                         .map((res) => (
-                                            <TableRow key={res._id} hover onClick={(event) => handleSelect(event, res)}>
+                                            <TableRow key={res._id} hover={!tableSelecting} onClick={tableSelecting ? () => {} : (event) => handleSelect(event, res)}>
                                                 <TableCell>
                                                     {res.name}{" "}
                                                     {res.comment && (
@@ -153,14 +178,35 @@ const ReservationList = () => {
                                                 <TableCell>{res.child == 0 ? res.adult : `${res.adult}+${res.child}`}</TableCell>
                                                 <TableCell>{moment(res.arrive).format("YYYY/MM/DD hh:mm")}</TableCell>
                                                 <TableCell>{moment(res.leave).format("YYYY/MM/DD hh:mm")}</TableCell>
-                                                <TableCell>{tableNames(res.tableIds)}</TableCell>
+                                                <TableCell>
+                                                    {tableSelecting ? (
+                                                        <Autocomplete
+                                                            multiple
+                                                            id="table"
+                                                            options={rest.active.tableList}
+                                                            value={res.tableIds}
+                                                            getOptionLabel={(option) => option.name}
+                                                            isOptionEqualToValue={(option, value) => option.name === value.name}
+                                                            onChange={(event, newInputValue) => {
+                                                                dispatch(modifyResTable({ id: res._id, value: newInputValue }))
+                                                                    .unwrap()
+                                                                    .then(() => {
+                                                                        dispatch(getDetailedReservations(restId))
+                                                                    });
+                                                                console.log(newInputValue);
+                                                            }}
+                                                            renderInput={(params) => <TextField {...params} variant="standard" label="Asztal" />}
+                                                        />
+                                                    ) : (
+                                                        tableNames(res.tableIds)
+                                                    )}
+                                                </TableCell>
                                                 <TableCell>{tableReqs(res.tableReqs)}</TableCell>
                                             </TableRow>
                                         ))
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={6} align="center">
-                                            {" "}
                                             ezen a napon nincs foglalás
                                         </TableCell>
                                     </TableRow>
@@ -393,11 +439,11 @@ const ReservationList = () => {
                                     .then(() => {
                                         setIsSelected(false);
                                         setIsEditing(false);
-                                        enqueueSnackbar('Foglalás frissítve', {variant:"success"})
+                                        enqueueSnackbar("Foglalás frissítve", { variant: "success" });
                                     })
                                     .catch((err) => {
                                         console.log(err);
-                                        enqueueSnackbar(err.data.error, {variant:"error"})
+                                        enqueueSnackbar(err.data.error, { variant: "error" });
                                     });
                             }}
                         >

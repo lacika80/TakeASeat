@@ -115,7 +115,14 @@ export const updateRes = createAsyncThunk("restaurant/updateRes", async (res, { 
         return rejectWithValue(err);
     }
 });
-
+export const modifyResTable = createAsyncThunk("restaurant/modifyResTable", async (data, { rejectWithValue }) => {
+    try {
+        const response = await api.modifyResTable(data);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
 const restaurantsSlice = createSlice({
     name: "restaurants",
     initialState,
