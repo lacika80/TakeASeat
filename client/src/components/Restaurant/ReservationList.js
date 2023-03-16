@@ -25,7 +25,7 @@ import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { getDetailedReservations, modifyResTable, updateRes } from "../../features/restaurantsSlice";
+import { delRes, getDetailedReservations, modifyResTable, updateRes } from "../../features/restaurantsSlice";
 import { useSnackbar } from "notistack";
 
 const ReservationList = () => {
@@ -41,6 +41,7 @@ const ReservationList = () => {
     const handleLeaveDateChange = (val) => setSelected({ ...selected, leave: val });
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [tableSelecting, setTableSelecting] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         if (rest.active && !(rest.status?.reservations == "loading" || rest.status?.reservations == "succeeded")) dispatch(getDetailedReservations(restId));
@@ -191,7 +192,7 @@ const ReservationList = () => {
                                                                 dispatch(modifyResTable({ id: res._id, value: newInputValue }))
                                                                     .unwrap()
                                                                     .then(() => {
-                                                                        dispatch(getDetailedReservations(restId))
+                                                                        dispatch(getDetailedReservations(restId));
                                                                     });
                                                             }}
                                                             renderInput={(params) => <TextField {...params} variant="standard" label="Asztal" />}
@@ -222,7 +223,7 @@ const ReservationList = () => {
                 </Paper>
             </Container>
             <Dialog
-                open={isSelected}
+                open={isSelected && !deleting}
                 onClose={() => {
                     setIsSelected(false);
                     setIsEditing(false);
@@ -409,46 +410,106 @@ const ReservationList = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    {!isEditing && <Button onClick={() => setIsEditing(true)}>Szerkesztés</Button>}
-                    {!isEditing && (
-                        <Button
-                            onClick={() => {
-                                setIsSelected(false);
-                                setIsEditing(false);
-                            }}
-                        >
-                            Bezárás
-                        </Button>
-                    )}
-                    {isEditing && (
-                        <Button
-                            onClick={() => {
-                                setIsSelected(false);
-                                setIsEditing(false);
-                            }}
-                        >
-                            Mégsem
-                        </Button>
-                    )}
-                    {isEditing && (
-                        <Button
-                            onClick={() => {
-                                dispatch(updateRes(selected))
-                                    .unwrap()
-                                    .then(() => {
+                    <Grid container direction="row">
+                        {!isEditing && (
+                            <Grid sx={{ mr: 5 }}>
+                                <Button
+                                    color="error"
+                                    onClick={() => {
+                                        setDeleting(true);
+                                    }}
+                                >
+                                    Törlés
+                                </Button>
+                            </Grid>
+                        )}
+                        <Grid container direction="row">
+                            {!isEditing && (
+                                <Button onClick={() => setIsEditing(true)} sx={{ mr: 2 }}>
+                                    Szerkesztés
+                                </Button>
+                            )}
+                            {!isEditing && (
+                                <Button
+                                    onClick={() => {
                                         setIsSelected(false);
                                         setIsEditing(false);
-                                        enqueueSnackbar("Foglalás frissítve", { variant: "success" });
-                                    })
-                                    .catch((err) => {
-                                        console.log(err);
-                                        enqueueSnackbar(err.data.error, { variant: "error" });
-                                    });
-                            }}
-                        >
-                            Elfogad
-                        </Button>
-                    )}
+                                    }}
+                                >
+                                    Bezárás
+                                </Button>
+                            )}
+                            {isEditing && (
+                                <Button
+                                    onClick={() => {
+                                        setIsSelected(false);
+                                        setIsEditing(false);
+                                    }}
+                                    sx={{ mr: 2 }}
+                                >
+                                    Mégsem
+                                </Button>
+                            )}
+                            {isEditing && (
+                                <Button
+                                    onClick={() => {
+                                        dispatch(updateRes(selected))
+                                            .unwrap()
+                                            .then(() => {
+                                                dispatch(getDetailedReservations(restId));
+                                                setIsSelected(false);
+                                                setIsEditing(false);
+                                                enqueueSnackbar("Foglalás frissítve", { variant: "success" });
+                                            })
+                                            .catch((err) => {
+                                                console.log(err);
+                                                enqueueSnackbar(err.data.error, { variant: "error" });
+                                            });
+                                    }}
+                                >
+                                    Elfogad
+                                </Button>
+                            )}
+                        </Grid>
+                    </Grid>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={deleting}
+                onClose={() => {
+                    setDeleting(false);
+                }}
+            >
+                <DialogTitle>{isSelected && `Törölni szeretné (${selected.name} ${moment(selected.arrive).format("HH:mm")})?`}</DialogTitle>
+                <DialogActions>
+                    <Button
+                        onClick={() => {
+                            dispatch(delRes({ resId: selected._id }))
+                                .unwrap()
+                                .then(() => {
+                                    enqueueSnackbar(`(${selected.name} ${moment(selected.arrive).format("HH:mm")}) foglalás törölve`, { variant: "success" });
+                                    dispatch(getDetailedReservations(restId));
+                                    setIsSelected(false);
+                                    setIsEditing(false);
+                                    setDeleting(false);
+
+                                    console.log("siker");
+                                })
+                                .catch(() => {
+                                    console.log(err);
+                                    enqueueSnackbar(err.data.error, { variant: "error" });
+                                });
+                        }}
+                    >
+                        Törlés
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            setDeleting(false);
+                        }}
+                    >
+                        Mégsem
+                    </Button>
                 </DialogActions>
             </Dialog>
         </>

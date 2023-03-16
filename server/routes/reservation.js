@@ -14,6 +14,7 @@ router.post("/", auth, cont.createReservation);
 router.post("/guestIsHere", auth, cont.guestIsHere);
 router.post("/update", auth, cont.updateReservation);
 router.post("/modifyTable", auth, cont.updateReservationTable);
+router.post("/delete", auth, cont.deleteReservation);
 
 router.delete("/delete", auth, cont.deleteReservation);
 

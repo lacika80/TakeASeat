@@ -69,6 +69,7 @@ export const getRestaurant = async (req, res) => {
             restaurant.users.map((item) => {
                 if (user._id.toString() == item.user.toString()) restaurant.permission = item.permission;
             });
+            restaurant.reservations = restaurant.reservations.filter((res) => res.isActive);
             return res.status(200).json({ restaurant });
         } else return res.status(405).json({ error: "Nincs ehhez jogosultságod" });
     } catch (error) {

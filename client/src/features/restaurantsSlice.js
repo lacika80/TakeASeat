@@ -123,6 +123,14 @@ export const modifyResTable = createAsyncThunk("restaurant/modifyResTable", asyn
         return rejectWithValue(err);
     }
 });
+export const delRes = createAsyncThunk("restaurant/delRes", async (data, { rejectWithValue }) => {
+    try {
+        const response = await api.delRes(data);
+        return response;
+    } catch (err) {
+        return rejectWithValue(err);
+    }
+});
 const restaurantsSlice = createSlice({
     name: "restaurants",
     initialState,
@@ -217,7 +225,7 @@ const restaurantsSlice = createSlice({
             .addCase(getDetailedReservations.fulfilled, (state, action) => {
                 state.status = { reservations: "succeeded" };
                 state.active.reservations = action.payload.data.reservations;
-            })
+            });
     },
 });
 

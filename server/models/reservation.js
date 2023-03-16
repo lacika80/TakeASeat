@@ -25,6 +25,7 @@ const reservationSchema = mongoose.Schema(
             ref: "User",
         },
         came: { type: Boolean, default: "false" },
+        isActive: { type: Boolean, default: "true" },
     },
     { timestamps: true }
 );

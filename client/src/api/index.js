@@ -147,3 +147,8 @@ export const modifyResTable = (data) =>
         if (error.message == "Network Error") throw { data: { error: error.message } };
         throw error.response;
     });
+export const delRes = (data) =>
+    API.post("reservation/delete", data).catch(function (error) {
+        if (error.message == "Network Error") throw { data: { error: error.message } };
+        throw error.response;
+    });
