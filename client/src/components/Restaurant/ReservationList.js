@@ -193,7 +193,6 @@ const ReservationList = () => {
                                                                     .then(() => {
                                                                         dispatch(getDetailedReservations(restId))
                                                                     });
-                                                                console.log(newInputValue);
                                                             }}
                                                             renderInput={(params) => <TextField {...params} variant="standard" label="Asztal" />}
                                                         />

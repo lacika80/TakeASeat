@@ -31,7 +31,6 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
         dispatch(deltable({ tableId: table._id, restId }));
     };
     useEffect(() => {
-        console.log(time);
         reservation.map((res) => {
             if (moment(res.arrive) <= time && moment(res.leave) >= time) {
                 setResChecker({ ...resChecker, inTime: true, here: res.came });
@@ -42,6 +41,9 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
             }
         });
     }, [reservation, time]);
+    useEffect(() => {
+        console.log(reservation);
+       }, [])
 
     return (
         <>
@@ -105,7 +107,7 @@ const Table = ({ table, editingTableList, addRes, addResForm, setAddResForm, res
                     <Grid container direction="row" justifyContent="center" alignItems="center" p={0} m={0}>
                         {resChecker.inTime && <Grid sx={{ p: 0 }} xs={3}></Grid>}
                         <Grid sx={{ p: 0 }} xs={6}>
-                            <Typography align="center">asd</Typography>
+                            <Typography align="center">{table.name}</Typography>
                         </Grid>
                         {resChecker.inTime && (
                             <Grid sx={{ p: 0 }} xs={3}>

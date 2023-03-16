@@ -188,7 +188,13 @@ function TableList({ socket }) {
                                                                     addRes={addRes}
                                                                     addResForm={addResForm}
                                                                     setAddResForm={setAddResForm}
-                                                                    reservation={rest.active.reservations.filter((item) => item.tableIds.includes(table._id))}
+                                                                    reservation={rest.active.reservations.filter((item) => {
+                                                                        if (item.tableIds.length > 0) {
+                                                                            if (typeof item.tableIds[0] == "string") {
+                                                                                if (item.tableIds.includes(table._id)) return true;
+                                                                            } else if (item.tableIds.map((table) => table._id).includes(table._id)) return true;
+                                                                        } else return false;
+                                                                    })}
                                                                     time={time}
                                                                 />
                                                             </Grid>
