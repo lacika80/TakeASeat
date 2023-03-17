@@ -84,7 +84,8 @@ function TableList({ socket }) {
     const addResInitialState = { name: "", phone: "", email: "", arrive: moment(), leave: moment(), adult: 0, child: 0, comment: "", tableReqs: "", tableIds: [], restId };
     const rest = useSelector((state) => state.restaurants);
     const [addResForm, setAddResForm] = useState(addResInitialState);
-    const [time, setTime] = useState(moment());
+    const [time, setTime] = useState(moment().seconds(0));
+    let interval;
 
     const SliderChange = (event, newValue) => {
         let newTime = moment.unix(time.unix());
@@ -125,6 +126,16 @@ function TableList({ socket }) {
     function valuetext(value) {
         return `${Math.floor(value / 12, 0)}:${(value - Math.floor(value / 12, 0) * 12) * 5 < 10 ? "0" + (value - Math.floor(value / 12, 0) * 12) * 5 : (value - Math.floor(value / 12, 0) * 12) * 5}`;
     }
+    useEffect(() => {
+        interval =
+            !interval &&
+            setInterval(() => {
+                if (moment().minutes() % 5 == 0 && moment().seconds() == 0 && moment().seconds(0).unix() - time.unix() <= 300 && moment().seconds(0).unix() - time.unix() > 0) {
+                    setTime(moment());
+                }
+            }, 1000);
+        return () => clearInterval(interval);
+    }, [time]);
 
     return (
         <>
