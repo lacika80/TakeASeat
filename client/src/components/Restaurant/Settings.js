@@ -4,6 +4,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Grid from "@mui/material/Unstable_Grid2";
 import Globals from "./Globals";
+import OpeningTimeTable from './OpeningTimeTable'
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -42,15 +43,15 @@ const Settings = ({ socket }) => {
                                 sx={{ borderRight: 1, borderColor: "divider", height: paperHeight }}
                             >
                                 <Tab label="Alapbeállítások" />
-                                <Tab label="foglalás" />
                                 <Tab label="nyitvatartás" />
+                                <Tab label="foglalás" />
                             </Tabs>
                         </Grid>
                         <TabPanel value={value} index={0}>
                             <Globals />
                         </TabPanel>
                         <TabPanel value={value} index={1}>
-                            Item Two
+                            <OpeningTimeTable />
                         </TabPanel>
                         <TabPanel value={value} index={2}>
                             Item Three
