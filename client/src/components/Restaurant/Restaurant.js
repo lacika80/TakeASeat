@@ -52,12 +52,16 @@ function Restaurant({ socket }) {
         <>
             <Grid container direction="column" alignItems="center" spacing={2}>
                 {/* Button's grid */}
-                <Grid xs={12}>
-                    <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} socket={socket} />
-                </Grid>
-                <Grid xs={12}>
-                    <Outlet context={{ editingTableList, setEditingTableList, setAddRes, addRes }} />
-                </Grid>
+                {rest.active && (
+                    <>
+                        <Grid xs={12}>
+                            <Menu editingTableList={editingTableList} setEditingTableList={setEditingTableList} setAddRes={setAddRes} permission={rest.active?.permission} socket={socket} />
+                        </Grid>
+                        <Grid xs={12}>
+                            <Outlet context={{ editingTableList, setEditingTableList, setAddRes, addRes }} />
+                        </Grid>
+                    </>
+                )}
             </Grid>
         </>
     );
