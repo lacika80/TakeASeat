@@ -2,7 +2,7 @@ import { Container, Divider, Button, LinearProgress, Paper } from "@mui/material
 import Grid from "@mui/material/Unstable_Grid2";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { getActive } from "../../features/restaurantsSlice";
 
 const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
@@ -10,6 +10,7 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
     const { restId } = useParams();
     const permission = rest.active?.permission;
     const dispatch = useDispatch();
+    const location = useLocation();
     useEffect(() => {
         dispatch(getActive(restId));
         if (socket) {
@@ -24,6 +25,9 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
             };
         }
     }, [socket]);
+    useEffect(() => {
+        if (location.pathname.split("/").length != 3 && editingTableList) setEditingTableList(false);
+    }, [location]);
 
     return (
         <Container maxWidth="xl">
@@ -36,7 +40,9 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                         </Button>
                     </Grid>
                     <Grid>
-                        <Button component={Link} to={`reservations`}>Foglalások listája</Button>
+                        <Button component={Link} to={`reservations`}>
+                            Foglalások listája
+                        </Button>
                     </Grid>
                     {/* <Grid>
                     <Button>Étterem beállításaid</Button>
@@ -60,7 +66,7 @@ const Menu = ({ editingTableList, setEditingTableList, setAddRes, socket }) => {
                         <></>
                     )}
 
-                    {permission & process.env.REACT_APP_R_CREATE_TABLE ? (
+                    {permission & process.env.REACT_APP_R_CREATE_TABLE && location.pathname.split("/").length == 3 ? (
                         <>
                             <Grid>
                                 {editingTableList ? (
